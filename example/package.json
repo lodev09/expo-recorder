@@ -1,5 +1,5 @@
 {
-  "name": "expo-recorder-sheet-example",
+  "name": "expo-recorder-example",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
+    "@lodev09/expo-recorder": "workspace:^",
     "@lodev09/react-native-true-sheet": "^0.11.2",
     "@react-navigation/native": "^6.0.2",
     "expo": "~51.0.2",
@@ -18,7 +19,6 @@
     "expo-constants": "~16.0.1",
     "expo-font": "~12.0.4",
     "expo-linking": "~6.3.1",
-    "expo-recorder-sheet": "workspace:^",
     "expo-router": "~3.5.11",
     "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "~1.12.1",

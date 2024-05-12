@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Image, StyleSheet } from 'react-native'
 
 import { HelloWave } from '@/components/HelloWave'
@@ -6,8 +6,15 @@ import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedButton } from '@/components/ThemedButton'
+import { ThemedRecorderSheet, type ThemedRecorderSheetRef } from '@/components/ThemedRecorderSheet'
 
-export default function HomeScreen() {
+const HomeScreen = () => {
+  const recorderRef = useRef<ThemedRecorderSheetRef>(null)
+
+  const openRecorder = () => {
+    recorderRef.current?.present()
+  }
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -22,7 +29,8 @@ export default function HomeScreen() {
         <ThemedText type="title">Expo Recorder</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedButton title="Show Recorder" />
+      <ThemedButton title="Start Recording" onPress={openRecorder} />
+      <ThemedRecorderSheet ref={recorderRef} />
     </ParallaxScrollView>
   )
 }
@@ -42,3 +50,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 })
+
+export default HomeScreen

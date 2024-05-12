@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "expo-recorder-sheet": ["./src/index"],
+      "@lodev09/expo-recorder": ["./src/index"],
       "@/*": ["./example/*"]
     },
     "allowUnreachableCode": false,

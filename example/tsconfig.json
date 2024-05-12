@@ -2,6 +2,7 @@
   "extends": "../tsconfig",
   "compilerOptions": {
     "paths": {
+      "@lodev09/expo-recorder": ["../src/index"],
       "@/*": ["./*"]
     }
   },

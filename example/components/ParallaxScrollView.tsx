@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { ThemedView } from '@/components/ThemedView'
+import { Spacing } from '@/constants/Spacing'
 
 const HEADER_HEIGHT = 250
 
@@ -67,8 +68,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 32,
-    gap: 16,
+    padding: Spacing.xl,
+    gap: Spacing.md,
     overflow: 'hidden',
   },
 })
