@@ -76,8 +76,12 @@
     "@types/react": "^18.2.44"
   },
   "peerDependencies": {
+    "@lodev09/react-native-true-sheet": "*",
+    "expo-av": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*"
   },
   "workspaces": [
     "example"

@@ -5,17 +5,20 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
+    "@lodev09/react-native-true-sheet": "^0.11.2",
     "@react-navigation/native": "^6.0.2",
     "expo": "~51.0.2",
+    "expo-av": "~14.0.4",
     "expo-constants": "~16.0.1",
     "expo-font": "~12.0.4",
     "expo-linking": "~6.3.1",
+    "expo-recorder-sheet": "workspace:^",
     "expo-router": "~3.5.11",
     "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "~1.12.1",
@@ -32,10 +35,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "jest-expo": "~51.0.1",
-    "babel-plugin-module-resolver": "^5.0.0",
     "@expo/webpack-config": "^18.0.1",
-    "babel-loader": "^8.1.0"
+    "babel-loader": "^8.1.0",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "jest-expo": "~51.0.1"
   },
   "private": true
 }

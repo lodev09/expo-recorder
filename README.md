@@ -5,7 +5,7 @@ Audio recorder sheet for your React Native apps ⏺️
 ## Installation
 
 ```sh
-npm install expo-recorder-sheet
+npx expo install expo-recorder-sheet expo-av @lodev09/react-native-true-sheet react-native-reanimated react-native-gesture-handler
 ```
 
 ## Usage
