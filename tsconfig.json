@@ -2,7 +2,8 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "expo-recorder-sheet": ["./src/index"]
+      "expo-recorder-sheet": ["./src/index"],
+      "@/*": ["./example/*"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

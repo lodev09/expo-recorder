@@ -30,6 +30,8 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "format": "prettier --write \"**/*.{js,ts,tsx}\"",
+    "tidy": "yarn typecheck && yarn lint && yarn format",
     "clean": "del-cli lib",
     "prepare": "bob build",
     "release": "release-it"
@@ -121,19 +123,7 @@
     "extends": [
       "@react-native",
       "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
-    }
+    ]
   },
   "eslintIgnore": [
     "node_modules/",
@@ -144,7 +134,9 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5",
-    "useTabs": false
+    "useTabs": false,
+    "printWidth": 100,
+    "semi": false
   },
   "react-native-builder-bob": {
     "source": "src",

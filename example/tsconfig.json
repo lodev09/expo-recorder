@@ -1,12 +1,6 @@
 {
   "extends": "../tsconfig",
   "compilerOptions": {
-    "paths": { "@/*": ["*"] }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+    // Avoid expo-cli auto-generating a tsconfig
+  }
 }

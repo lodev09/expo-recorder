@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'expo-router';
 import { openBrowserAsync } from 'expo-web-browser';
 import { type ComponentProps } from 'react';
