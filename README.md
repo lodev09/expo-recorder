@@ -1,6 +1,10 @@
-# @lodev09/expo-recorder
+# Expo Recorder
 
-Audio recorder sheet for your React Native apps ⏺️
+Audio recorder for your React Native apps 🎙️
+
+<img alt="Expo Recorder" src="preview.gif" width="300px" />
+
+This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/). Features an animated Waveform for your recording needs. 💪
 
 ## Installation
 
@@ -10,13 +14,35 @@ npx expo install @lodev09/expo-recorder react-native-reanimated react-native-ges
 
 ## Usage
 
-```js
-import { multiply } from 'expo-recorder';
+```tsx
+import { Recorder, type RecorderRef } from '@lodev09/expo-recorder';
 
-// ...
+const App = () => {
+  const recorder = useRef<RecorderRef>(null)
 
-const result = await multiply(3, 7);
+  const record = () => {
+    record.current?.startRecording()
+  }
+
+  const stopRecord = () => {
+    record.current?.stopRecording()
+  }
+
+  const recordingStopped = (uri?: string) => {
+    console.log(uri) // Save the uri somewhere! 🎉
+  }
+
+  return (
+    <View>
+      <Recorder ref={recorder} onRecordStop={recordingStopped} />
+      <Button title="Record" onPress={record} />
+      <Button title="Stop" onPress={stop} />
+    </View>
+  )
+}
 ```
+
+For more advanced usage, see [example](example/components/ThemedRecorderSheet.tsx).
 
 ## Contributing
 
@@ -28,4 +54,4 @@ MIT
 
 ---
 
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+Made with ❤️ by [@lodev09](http://linkedin.com/in/lodev09/)
