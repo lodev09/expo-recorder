@@ -5,6 +5,7 @@ import {
   type ViewStyle,
   View,
   type ColorValue,
+  type ViewProps,
 } from 'react-native'
 import Animated, {
   useSharedValue,
@@ -33,7 +34,7 @@ import { Timeline } from './Timeline'
 
 const DEFAULT_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.2)'
 
-interface WaveformProps {
+interface WaveformProps extends ViewProps {
   backgroundColor?: ColorValue
   tintColor?: ColorValue
   timelineColor?: ColorValue
@@ -60,9 +61,12 @@ export const Waveform = (props: WaveformProps) => {
     meterings = [],
     recording,
     playing,
+    ...rest
   } = props
 
   const dimensions = useWindowDimensions()
+
+  const waveformBackgroundColor = backgroundColor ?? DEFAULT_BACKGROUND_COLOR
 
   const prevScrollX = useSharedValue(0)
 
@@ -83,7 +87,7 @@ export const Waveform = (props: WaveformProps) => {
   const $waveformLineStyles: StyleProp<ViewStyle> = [
     $waveformLines,
     {
-      backgroundColor: 'green',
+      backgroundColor: waveformBackgroundColor,
       width: waveformMaxWidth,
     },
   ]
@@ -111,10 +115,8 @@ export const Waveform = (props: WaveformProps) => {
   return (
     <GestureHandlerRootView style={$gestureHandler}>
       <GestureDetector gesture={pan}>
-        <View>
-          <View
-            style={[$background, { backgroundColor: backgroundColor ?? DEFAULT_BACKGROUND_COLOR }]}
-          />
+        <View {...rest}>
+          <View style={[$background, { backgroundColor: waveformBackgroundColor }]} />
           <Animated.View style={$waveformWrapper}>
             <View style={$waveformLineStyles}>
               {meterings.map(({ position, key, db }, index, arr) => (
@@ -123,7 +125,11 @@ export const Waveform = (props: WaveformProps) => {
                   position={position}
                   db={db}
                   color={
-                    recording ? (index === arr.length - 1 ? 'pink' : WAVEFORM_TINT_COLOR) : 'gray'
+                    recording
+                      ? index === arr.length - 1
+                        ? waveformBackgroundColor
+                        : WAVEFORM_TINT_COLOR
+                      : 'gray'
                   }
                 />
               ))}

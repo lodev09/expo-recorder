@@ -2897,7 +2897,6 @@ __metadata:
     "@types/jest": ^29.5.5
     "@types/react": ^18.2.44
     commitlint: ^17.0.2
-    date-fns: "*"
     del-cli: ^5.1.0
     eslint: ^8.57.0
     eslint-config-prettier: ^9.1.0
@@ -7366,7 +7365,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:*":
+"date-fns@npm:^3.6.0":
   version: 3.6.0
   resolution: "date-fns@npm:3.6.0"
   checksum: 0daa1e9a436cf99f9f2ae9232b55e11f3dd46132bee10987164f3eebd29f245b2e066d7d7db40782627411ecf18551d8f4c9fcdf2226e48bb66545407d448ab7
@@ -8784,6 +8783,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-haptics@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-haptics@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 5419e6451d3718dde8fb099eb710d7c90448d75d00d44e8b42ec301ec45d52bdb52e6ef2959fd0f207abcbe090b0c851b8bd94aba90343053d5435e4e545a997
+  languageName: node
+  linkType: hard
+
 "expo-keep-awake@npm:~13.0.1":
   version: 13.0.1
   resolution: "expo-keep-awake@npm:13.0.1"
@@ -8855,10 +8863,12 @@ __metadata:
     "@react-navigation/native": ^6.0.2
     babel-loader: ^8.1.0
     babel-plugin-module-resolver: ^5.0.0
+    date-fns: ^3.6.0
     expo: ~51.0.2
     expo-av: ~14.0.4
     expo-constants: ~16.0.1
     expo-font: ~12.0.4
+    expo-haptics: ~13.0.1
     expo-linking: ~6.3.1
     expo-router: ~3.5.11
     expo-splash-screen: ~0.27.4

@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useRef,
 } from 'react'
-import { View, Text, type TextStyle } from 'react-native'
 import { type AVPlaybackStatus, Audio } from 'expo-av'
 import {
   runOnJS,
@@ -16,7 +15,7 @@ import {
   withTiming,
 } from 'react-native-reanimated'
 
-import type { Metering, RecorderProps, RecorderRef } from './Recorder.types'
+import type { Metering, PlaybackStatus, RecorderProps, RecorderRef } from './Recorder.types'
 import { Waveform } from './components'
 import {
   MAX_RECORDING_TIME,
@@ -27,19 +26,25 @@ import {
   TIMELINE_MS_PER_LINE,
   TIMELINE_TOTAL_WIDTH_PER_250_MS,
   TIMELINE_UPDATE_INTERVAL,
-  formatTimer,
-  spacing,
 } from './helpers'
 
 export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>) => {
-  const { backgroundColor, tintColor, timelineColor, textColor, ...rest } = props
+  const {
+    onPositionChange,
+    onRecordStart,
+    onRecordStop,
+    onRecordReset,
+    onPlaybackStart,
+    onPlaybackStop,
+    ...rest
+  } = props
 
   const recording = useRef<Audio.Recording>()
   const sound = useRef<Audio.Sound>()
   const recordingUri = useRef<string>()
 
   const [isRecording, setIsRecording] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPreviewPlaying, setisPreviewPlaying] = useState(false)
 
   const [meterings, setMeterings] = useState<Metering[]>([])
   const [position, setPosition] = useState(0)
@@ -52,8 +57,13 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   const scale = useSharedValue(1)
   const currentMs = useSharedValue(0)
 
+  const updatePosition = (positionMs: number) => {
+    setPosition(positionMs)
+    onPositionChange?.(positionMs)
+  }
+
   useDerivedValue(() => {
-    if (isPlaying) return
+    if (isPreviewPlaying) return
     if (isRecording) return
     if (isScrollAnimating.value) return
 
@@ -64,25 +74,26 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         ) * 100
 
       if (ms <= duration && ms !== currentMs.value) {
-        runOnJS(setPosition)(ms)
+        runOnJS(updatePosition)(ms)
         currentMs.value = ms
       }
     } else {
-      runOnJS(setPosition)(0)
+      runOnJS(updatePosition)(0)
     }
   })
 
   const handlePlaybackStatus = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       if (status.didJustFinish) {
-        setIsPlaying(false)
+        setisPreviewPlaying(false)
+        onPlaybackStop?.({ position: status.positionMillis, duration: status.durationMillis })
       } else if (status.isPlaying && status.positionMillis >= (status.durationMillis ?? 0)) {
         // Android workaround: force pause when position reached duration
-        setIsPlaying(false)
+        setisPreviewPlaying(false)
         sound.current?.pauseAsync()
       }
 
-      setPosition(status.positionMillis)
+      updatePosition(status.positionMillis)
     }
   }
 
@@ -94,7 +105,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         return
       }
 
-      setPosition(status.durationMillis)
+      updatePosition(status.durationMillis)
       setMeterings((prev) => {
         return [
           ...prev,
@@ -108,12 +119,36 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     }
   }
 
+  const record = async () => {
+    if (isRecording) return
+    if (recording.current) return
+
+    setMeterings([])
+    updatePosition(0)
+    setIsRecording(true)
+
+    const newRecording = new Audio.Recording()
+    recording.current = newRecording
+
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    })
+
+    newRecording.setProgressUpdateInterval(TIMELINE_UPDATE_INTERVAL)
+    newRecording.setOnRecordingStatusUpdate(handleRecordingStatus)
+
+    await newRecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
+    const status = await newRecording.startAsync()
+    onRecordStart?.(status.uri)
+  }
+
   const reset = async () => {
-    setIsPlaying(false)
+    setisPreviewPlaying(false)
     setIsRecording(false)
 
     setMeterings([])
-    setPosition(0)
+    updatePosition(0)
     setDuration(0)
 
     recordingUri.current = undefined
@@ -126,6 +161,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     sound.current = undefined
 
     await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
+    onRecordReset?.()
   }
 
   const resetScroll = (callback: () => void) => {
@@ -136,12 +172,19 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     })
   }
 
-  const playAtPosition = async (ms: number) => {
+  const playbackAtPosition = async (ms: number) => {
     if (!sound.current) return
 
     await sound.current.setPositionAsync(ms)
-    await sound.current.playAsync()
-    setIsPlaying(true)
+    const playStatus = await sound.current.playAsync()
+
+    let status: PlaybackStatus | undefined
+    if (playStatus.isLoaded) {
+      status = { position: playStatus.positionMillis, duration: playStatus.durationMillis }
+    }
+
+    onPlaybackStart?.(status)
+    setisPreviewPlaying(true)
   }
 
   const stopRecording = async () => {
@@ -152,6 +195,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       await recording.current?.stopAndUnloadAsync()
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
 
+      let durationMillis: number | undefined
       const uri = recording.current?.getURI()
       if (uri) {
         const newSound = new Audio.Sound()
@@ -163,16 +207,18 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         // Sync position and duration ms
         const currentStatus = await newSound.getStatusAsync()
         if (currentStatus.isLoaded) {
-          const durationMillis = currentStatus.durationMillis ?? duration
+          durationMillis = currentStatus.durationMillis ?? duration
           await newSound.setPositionAsync(durationMillis)
 
-          setPosition(durationMillis)
+          updatePosition(durationMillis)
           setDuration(durationMillis)
         }
 
         sound.current = newSound
         recordingUri.current = uri
       }
+
+      onRecordStop?.(uri, durationMillis)
     } catch (e) {
       console.error(e)
     } finally {
@@ -188,13 +234,13 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   }, [isRecording, waveformMaxWidth])
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPreviewPlaying) {
       const x = (position / TIMELINE_MS_PER_LINE) * TIMELINE_TOTAL_WIDTH_PER_250_MS
       scrollX.value = withTiming(-Math.min(x, waveformMaxWidth), {
         duration: TIMELINE_UPDATE_INTERVAL,
       })
     }
-  }, [isPlaying, position])
+  }, [isPreviewPlaying, position])
 
   useEffect(() => {
     if (isRecording && duration >= MAX_RECORDING_TIME) {
@@ -213,76 +259,57 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   useImperativeHandle(ref, () => ({
     startRecording: async () => {
-      if (isRecording) return
-      if (recording.current) return
-
-      setMeterings([])
-      setPosition(0)
-      setIsRecording(true)
-
-      const newRecording = new Audio.Recording()
-      recording.current = newRecording
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      })
-
-      newRecording.setProgressUpdateInterval(TIMELINE_UPDATE_INTERVAL)
-      newRecording.setOnRecordingStatusUpdate(handleRecordingStatus)
-
-      await newRecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
-      await newRecording.startAsync()
+      if (meterings.length > 0) {
+        resetScroll(record)
+      } else {
+        await record()
+      }
     },
+    stopRecording,
     resetRecording: async () => {
+      if (isRecording) return
+
       if (meterings.length > 0) {
         resetScroll(reset)
       } else {
         await reset()
       }
     },
-    playSound: async () => {
-      if (isPlaying) return
+    startPlayback: async () => {
+      if (isRecording) return
+      if (isPreviewPlaying) return
 
       const playPosition = position / 100 < Math.floor(duration / 100) ? position : 0
       if (playPosition === 0) {
-        resetScroll(() => playAtPosition(0))
+        resetScroll(() => playbackAtPosition(0))
       } else {
-        await playAtPosition(playPosition)
+        await playbackAtPosition(playPosition)
       }
     },
-    stopSound: async () => {
+    stopPlayback: async () => {
       if (!sound.current) return
-      if (!isPlaying) return
+      if (!isPreviewPlaying) return
 
-      await sound.current.pauseAsync()
-      setIsPlaying(false)
+      const pauseStatus = await sound.current.pauseAsync()
+
+      let status: PlaybackStatus | undefined
+      if (pauseStatus.isLoaded) {
+        status = { position: pauseStatus.positionMillis, duration: pauseStatus.durationMillis }
+      }
+
+      onPlaybackStop?.(status)
+      setisPreviewPlaying(false)
     },
   }))
 
   return (
-    <View {...rest}>
-      <Waveform
-        meterings={isRecording ? meterings.slice(-60) : meterings}
-        waveformMaxWidth={waveformMaxWidth}
-        recording={isRecording}
-        playing={isPlaying}
-        backgroundColor={backgroundColor}
-        tintColor={tintColor}
-        timelineColor={timelineColor}
-        scrollX={scrollX}
-      />
-      <View style={{ padding: spacing.md, marginTop: spacing.xxl }}>
-        <Text style={[$positionText, { color: textColor ?? '#333333' }]}>
-          {formatTimer(Math.round(position / 100) * 100, true)}
-        </Text>
-      </View>
-    </View>
+    <Waveform
+      meterings={isRecording ? meterings.slice(-60) : meterings}
+      waveformMaxWidth={waveformMaxWidth}
+      recording={isRecording}
+      playing={isPreviewPlaying}
+      scrollX={scrollX}
+      {...rest}
+    />
   )
 })
-
-const $positionText: TextStyle = {
-  fontWeight: 'medium',
-  fontSize: 28,
-  textAlign: 'center',
-}

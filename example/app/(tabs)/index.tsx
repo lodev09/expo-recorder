@@ -1,5 +1,6 @@
 import React, { useRef } from 'react'
 import { Image, StyleSheet } from 'react-native'
+import { Audio } from 'expo-av'
 
 import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
@@ -11,7 +12,10 @@ import { ThemedRecorderSheet, type ThemedRecorderSheetRef } from '@/components/T
 const HomeScreen = () => {
   const recorderRef = useRef<ThemedRecorderSheetRef>(null)
 
-  const openRecorder = () => {
+  const openRecorder = async () => {
+    const permissionStatus = await Audio.requestPermissionsAsync()
+    if (!permissionStatus.granted) return
+
     recorderRef.current?.present()
   }
 
@@ -29,7 +33,7 @@ const HomeScreen = () => {
         <ThemedText type="title">Expo Recorder</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedButton title="Start Recording" onPress={openRecorder} />
+      <ThemedButton title="Open Recorder" onPress={openRecorder} />
       <ThemedRecorderSheet ref={recorderRef} />
     </ParallaxScrollView>
   )

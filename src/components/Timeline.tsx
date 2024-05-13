@@ -6,7 +6,7 @@ import {
   TIMELINE_GAP_PER_250_MS,
   TIMELINE_HEIGHT,
   WAVEFORM_LINE_WIDTH,
-  formatTimer,
+  formatSeconds,
   spacing,
 } from '../helpers'
 
@@ -29,7 +29,7 @@ export const Timeline = memo(({ color }: TimelineProps) => {
             <View style={{ height, width: WAVEFORM_LINE_WIDTH, backgroundColor: timelineColor }} />
             {isSeconds && (
               <Text style={[$timelineSeconds, { color: timelineColor }]}>
-                {formatTimer((lineMs / 4) * 1000)}
+                {formatSeconds(lineMs / 4)}
               </Text>
             )}
           </View>
