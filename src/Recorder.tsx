@@ -22,6 +22,7 @@ import {
   METERING_MIN_POWER,
   SPRING_CONFIG,
   TIMELINE_MS_PER_LINE,
+  WAVEFORM_LINE_WIDTH,
   spacing,
 } from './helpers'
 
@@ -52,7 +53,8 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
 
-  const waveformMaxWidth = (duration / TIMELINE_MS_PER_LINE) * timelineGap
+  const timelineTotalWidthPer250ms = timelineGap + WAVEFORM_LINE_WIDTH
+  const waveformMaxWidth = (duration / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms
 
   const isScrollAnimating = useSharedValue(false)
   const scrollX = useSharedValue(0)
@@ -70,7 +72,9 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
     if (scrollX.value <= 0) {
       const ms =
-        Math.floor(((Math.abs(scrollX.value) / timelineGap) * TIMELINE_MS_PER_LINE) / 100) * 100
+        Math.floor(
+          ((Math.abs(scrollX.value) / timelineTotalWidthPer250ms) * TIMELINE_MS_PER_LINE) / 100
+        ) * 100
 
       if (ms <= duration && ms !== currentMs.value) {
         runOnJS(updatePosition)(ms)
@@ -234,7 +238,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   useEffect(() => {
     if (isPreviewPlaying) {
-      const x = (position / TIMELINE_MS_PER_LINE) * timelineGap
+      const x = (position / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms
       scrollX.value = withTiming(-Math.min(x, waveformMaxWidth), {
         duration: progressInterval,
       })

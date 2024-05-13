@@ -37,7 +37,7 @@ export const Timeline = memo(({ color, gap }: TimelineProps) => {
 const $timelineSeconds: TextStyle = {
   position: 'absolute',
   width: spacing.xxl,
-  fontSize: 14,
+  fontSize: 12,
   bottom: 0,
 }
 

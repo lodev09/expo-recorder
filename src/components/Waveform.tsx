@@ -170,16 +170,13 @@ export const Waveform = (props: WaveformProps) => {
 
 const WaveformLine = memo((props: WaveformLineProps) => {
   const { db, maxHeight, gap, color, position } = props
-
-  const timelineTotalWidthPer250ms = gap + WAVEFORM_LINE_WIDTH
-
   return (
     <View
       style={[
         $waveformLine,
         {
           backgroundColor: color,
-          left: (position / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms,
+          left: (position / TIMELINE_MS_PER_LINE) * (gap + WAVEFORM_LINE_WIDTH),
           height: interpolate(
             db,
             [METERING_MIN_POWER, METERING_MAX_POWER],
