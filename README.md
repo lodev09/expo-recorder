@@ -15,17 +15,18 @@ npx expo install @lodev09/expo-recorder react-native-reanimated react-native-ges
 ## Usage
 
 ```tsx
-import { Recorder, type RecorderRef } from '@lodev09/expo-recorder';
+import { View, Button } from 'react-native'
+import { Recorder, type RecorderRef } from '@lodev09/expo-recorder'
 
 const App = () => {
   const recorder = useRef<RecorderRef>(null)
 
-  const record = () => {
-    record.current?.startRecording()
+  const startRecord = () => {
+    recorder.current?.startRecording()
   }
 
   const stopRecord = () => {
-    record.current?.stopRecording()
+    recorder.current?.stopRecording()
   }
 
   const recordingStopped = (uri?: string) => {
@@ -35,8 +36,8 @@ const App = () => {
   return (
     <View>
       <Recorder ref={recorder} onRecordStop={recordingStopped} />
-      <Button title="Record" onPress={record} />
-      <Button title="Stop" onPress={stop} />
+      <Button title="Record" onPress={startRecord} />
+      <Button title="Stop" onPress={stopRecord} />
     </View>
   )
 }
