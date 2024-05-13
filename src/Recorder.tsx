@@ -32,7 +32,7 @@ import {
 } from './helpers'
 
 export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>) => {
-  const { ...rest } = props
+  const { backgroundColor, tintColor, timelineColor, textColor, ...rest } = props
 
   const recording = useRef<Audio.Recording>()
   const sound = useRef<Audio.Sound>()
@@ -267,10 +267,15 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         waveformMaxWidth={waveformMaxWidth}
         recording={isRecording}
         playing={isPlaying}
+        backgroundColor={backgroundColor}
+        tintColor={tintColor}
+        timelineColor={timelineColor}
         scrollX={scrollX}
       />
       <View style={{ padding: spacing.md, marginTop: spacing.xxl }}>
-        <Text style={$positionText}>{formatTimer(Math.round(position / 100) * 100, true)}</Text>
+        <Text style={[$positionText, { color: textColor ?? '#333333' }]}>
+          {formatTimer(Math.round(position / 100) * 100, true)}
+        </Text>
       </View>
     </View>
   )
@@ -278,6 +283,6 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
 const $positionText: TextStyle = {
   fontWeight: 'medium',
-  fontSize: spacing.xxl,
+  fontSize: 28,
   textAlign: 'center',
 }

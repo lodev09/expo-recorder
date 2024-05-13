@@ -24,9 +24,12 @@ export const TIMELINE_POSITION_INDICATOR_WIDTH = 2
 export const WAVEFORM_LINE_WIDTH = 1
 
 export const TIMELINE_TOTAL_WIDTH_PER_250_MS = TIMELINE_GAP_PER_250_MS + WAVEFORM_LINE_WIDTH
-export const TIMELINES = Array.from<number>({
-  length: MAX_RECORDING_TIME / TIMELINE_MS_PER_LINE + 1,
-}).map((i) => i)
+export const TIMELINES = Array.from(
+  {
+    length: MAX_RECORDING_TIME / TIMELINE_MS_PER_LINE + 1,
+  },
+  (_, k) => k
+).map((i) => i)
 
 export const SPRING_SHORT_CONFIG: WithSpringConfig = {
   stiffness: 120,

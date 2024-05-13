@@ -2399,11 +2399,11 @@ __metadata:
   linkType: hard
 
 "@expo/vector-icons@npm:^14.0.0":
-  version: 14.0.1
-  resolution: "@expo/vector-icons@npm:14.0.1"
+  version: 14.0.2
+  resolution: "@expo/vector-icons@npm:14.0.2"
   dependencies:
     prop-types: ^15.8.1
-  checksum: a2d359144715c854646e82e8d4ead86d6517d90604089a580e13c02f1548828446d191d8c54c871bb1505d524bf89da1e881f9815e920d58b91a9387d97bad92
+  checksum: 49e27ff52eb138745313fa2c39863fb762230b0089b910d668d7f2c06b7e71a0249dc3a26bfc8725d07bdfaadab1dbcbce087b34dfc244b00a15fc02fe4866e2
   languageName: node
   linkType: hard
 
@@ -2908,13 +2908,15 @@ __metadata:
     react: 18.2.0
     react-native: 0.74.1
     react-native-builder-bob: ^0.20.0
-    react-native-gesture-handler: ^2
-    react-native-reanimated: ^3
+    react-native-gesture-handler: ~2.16.1
+    react-native-reanimated: ~3.10.1
     release-it: ^15.0.0
     typescript: ~5.2.0
   peerDependencies:
     react: "*"
     react-native: "*"
+    react-native-gesture-handler: ^2
+    react-native-reanimated: ^3
   languageName: unknown
   linkType: soft
 
@@ -8876,8 +8878,8 @@ __metadata:
   linkType: soft
 
 "expo-router@npm:~3.5.11":
-  version: 3.5.11
-  resolution: "expo-router@npm:3.5.11"
+  version: 3.5.12
+  resolution: "expo-router@npm:3.5.12"
   dependencies:
     "@expo/metro-runtime": 3.2.1
     "@expo/server": ^0.4.0
@@ -8904,7 +8906,7 @@ __metadata:
       optional: true
     react-native-reanimated:
       optional: true
-  checksum: a82f8b9212118745bafd286308eaa16d09a6ad55031fc81e9387670862361b034f1aeeb03bc55380a34021c779d2f177e9779ed3c3119422be5e4b9d18e4bae6
+  checksum: b8bfaa7775bf6f61d579b2a1b6a7aee150fbb32b28846da03a60757b3b68f7995d06c8435891b60d6d74df39d50793682b385c224d16a23f991519c019f7d07f
   languageName: node
   linkType: hard
 
@@ -8948,8 +8950,8 @@ __metadata:
   linkType: hard
 
 "expo@npm:~51.0.2":
-  version: 51.0.3
-  resolution: "expo@npm:51.0.3"
+  version: 51.0.4
+  resolution: "expo@npm:51.0.4"
   dependencies:
     "@babel/runtime": ^7.20.0
     "@expo/cli": 0.18.11
@@ -8968,7 +8970,7 @@ __metadata:
     whatwg-url-without-unicode: 8.0.0-3
   bin:
     expo: bin/cli
-  checksum: d3bcd04e293f805ac7e705c2616e131643e0fac6157a270091ba95b77134103a724833f5b0a9342e2919577c356c8e4d80470efe70644648e6008e46fa1ab8ff
+  checksum: b4fdcfee32128ebc2748db67555c9c0cae8224b17a2b97cf2b6d8f5d5c7161b826debb29f1559bac2f1f61fc41fd3411c4787408204fcbd55ce524d9e2cc8659
   languageName: node
   linkType: hard
 
@@ -13932,9 +13934,9 @@ __metadata:
   linkType: hard
 
 "nwsapi@npm:^2.2.2":
-  version: 2.2.9
-  resolution: "nwsapi@npm:2.2.9"
-  checksum: 3ab2bc47d5507a76e2fdee5aae7ea2875c6def912d0401126cad3e39825a7decb7a02622810c855a7902bd31e917e606b37882dca12b0ae54b4d3b70275de927
+  version: 2.2.10
+  resolution: "nwsapi@npm:2.2.10"
+  checksum: 5f1d361b38c47ab49727d5ea8bbfeb5867ae6de0e538eec9a8b77c88005ddde36d8b930e0730b50ee5e5dda949112c0f9ffed1bf15e7e1b3cd9cfa319f5a9b6f
   languageName: node
   linkType: hard
 
@@ -15566,7 +15568,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:^2, react-native-gesture-handler@npm:~2.16.1":
+"react-native-gesture-handler@npm:~2.16.1":
   version: 2.16.2
   resolution: "react-native-gesture-handler@npm:2.16.2"
   dependencies:
@@ -15592,26 +15594,6 @@ __metadata:
   peerDependencies:
     react: ^16.6.0 || ^17.0.0 || ^18.0.0
   checksum: 5487f4eb9d3a0b6747d258d4371667384d0f2722be11ac41c7bb9777d25fb098c702ab94fb010223e2093e417a0d334c9314df40e3b3038290de58c62154000d
-  languageName: node
-  linkType: hard
-
-"react-native-reanimated@npm:^3":
-  version: 3.11.0
-  resolution: "react-native-reanimated@npm:3.11.0"
-  dependencies:
-    "@babel/plugin-transform-arrow-functions": ^7.0.0-0
-    "@babel/plugin-transform-nullish-coalescing-operator": ^7.0.0-0
-    "@babel/plugin-transform-optional-chaining": ^7.0.0-0
-    "@babel/plugin-transform-shorthand-properties": ^7.0.0-0
-    "@babel/plugin-transform-template-literals": ^7.0.0-0
-    "@babel/preset-typescript": ^7.16.7
-    convert-source-map: ^2.0.0
-    invariant: ^2.2.4
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 5d0c6be5c9b6d933755e50895a1ec903100800a83b7b48fbc6a4242063f0de52a78f5af69d39da4241f6071a4416602f150c3a53e9a97d20880edb3612ffadbd
   languageName: node
   linkType: hard
 

@@ -1,6 +1,11 @@
-import type { ViewProps } from 'react-native'
+import type { ColorValue, ViewProps } from 'react-native'
 
-export interface RecorderProps extends Omit<ViewProps, 'children'> {}
+export interface RecorderProps extends Omit<ViewProps, 'children'> {
+  backgroundColor?: ColorValue
+  tintColor?: ColorValue
+  timelineColor?: ColorValue
+  textColor?: ColorValue
+}
 
 export interface RecorderRef {
   startRecording: () => Promise<void>

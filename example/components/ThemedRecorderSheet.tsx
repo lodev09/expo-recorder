@@ -37,6 +37,12 @@ export const ThemedRecorderSheet = forwardRef(
 
     const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'recorderSheet')
     const iconColor = useThemeColor({}, 'recorderIcon')
+    const tintColor = useThemeColor({}, 'recorderTint')
+    const timelineColor = useThemeColor({}, 'recorderTimeline')
+    const textColor = useThemeColor({}, 'text')
+    const recordBorderColor = useThemeColor({ light: 'rgba(0,0,0,0.3)' }, 'text')
+    const recorderBackgroundColor = useThemeColor({}, 'recorderBackground')
+
     const scale = useSharedValue(1)
 
     const toggleRecording = async () => {}
@@ -62,15 +68,21 @@ export const ThemedRecorderSheet = forwardRef(
         contentContainerStyle={[$sheetContent, { paddingBottom: insets.bottom + Spacing.md }]}
         {...rest}
       >
-        <Recorder ref={recorderRef} />
-        <Box row justify="space-between" align="center">
+        <Recorder
+          ref={recorderRef}
+          tintColor={tintColor}
+          timelineColor={timelineColor}
+          textColor={textColor}
+          backgroundColor={recorderBackgroundColor}
+        />
+        <Box row justify="space-between" align="center" mt={Spacing.lg}>
           <Box>
             <TouchableOpacity activeOpacity={0.8} style={$recordControl} onPress={() => undefined}>
               <Ionicons name="refresh" size={Spacing.xl} style={{ color: iconColor }} />
             </TouchableOpacity>
           </Box>
           <Box justify="center" align="center" mx={Spacing.xxl}>
-            <View style={$recordButtonBackground} />
+            <View style={[$recordButtonBackground, { borderColor: recordBorderColor }]} />
             <Pressable style={$recordButton} onPress={toggleRecording}>
               <Animated.View style={$recordIndicatorStyles} />
             </Pressable>

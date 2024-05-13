@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { View, type TextStyle, type ViewStyle, Text } from 'react-native'
+import { View, type TextStyle, type ViewStyle, Text, type ColorValue } from 'react-native'
 
 import {
   TIMELINES,
@@ -10,7 +10,15 @@ import {
   spacing,
 } from '../helpers'
 
-export const Timeline = memo(() => {
+const DEFAULT_COLOR = 'rgba(0, 0, 0, 0.5)'
+
+interface TimelineProps {
+  color?: ColorValue
+}
+
+export const Timeline = memo(({ color }: TimelineProps) => {
+  const timelineColor = color ?? DEFAULT_COLOR
+
   return (
     <View style={$container}>
       {TIMELINES.map((lineMs) => {
@@ -18,8 +26,12 @@ export const Timeline = memo(() => {
         const height = isSeconds ? spacing.sm : spacing.xs
         return (
           <View key={String(lineMs)}>
-            <View style={{ height, width: WAVEFORM_LINE_WIDTH, backgroundColor: 'gray' }} />
-            {isSeconds && <Text style={$timelineSeconds}>{formatTimer((lineMs / 4) * 1000)}</Text>}
+            <View style={{ height, width: WAVEFORM_LINE_WIDTH, backgroundColor: timelineColor }} />
+            {isSeconds && (
+              <Text style={[$timelineSeconds, { color: timelineColor }]}>
+                {formatTimer((lineMs / 4) * 1000)}
+              </Text>
+            )}
           </View>
         )
       })}
@@ -30,8 +42,7 @@ export const Timeline = memo(() => {
 const $timelineSeconds: TextStyle = {
   position: 'absolute',
   width: spacing.xxl,
-  fontSize: spacing.xs,
-  color: 'yellow',
+  fontSize: 14,
   bottom: 0,
 }
 

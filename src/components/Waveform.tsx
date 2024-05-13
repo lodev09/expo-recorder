@@ -31,7 +31,12 @@ import {
 import { TimeIndicator } from './TimeIndicator'
 import { Timeline } from './Timeline'
 
+const DEFAULT_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.2)'
+
 interface WaveformProps {
+  backgroundColor?: ColorValue
+  tintColor?: ColorValue
+  timelineColor?: ColorValue
   meterings: Metering[]
   recording: boolean
   playing: boolean
@@ -46,7 +51,16 @@ interface WaveformLineProps {
 }
 
 export const Waveform = (props: WaveformProps) => {
-  const { scrollX, waveformMaxWidth, meterings = [], recording, playing } = props
+  const {
+    backgroundColor,
+    tintColor,
+    timelineColor,
+    scrollX,
+    waveformMaxWidth,
+    meterings = [],
+    recording,
+    playing,
+  } = props
 
   const dimensions = useWindowDimensions()
 
@@ -98,7 +112,9 @@ export const Waveform = (props: WaveformProps) => {
     <GestureHandlerRootView style={$gestureHandler}>
       <GestureDetector gesture={pan}>
         <View>
-          <View style={$background} />
+          <View
+            style={[$background, { backgroundColor: backgroundColor ?? DEFAULT_BACKGROUND_COLOR }]}
+          />
           <Animated.View style={$waveformWrapper}>
             <View style={$waveformLineStyles}>
               {meterings.map(({ position, key, db }, index, arr) => (
@@ -112,9 +128,9 @@ export const Waveform = (props: WaveformProps) => {
                 />
               ))}
             </View>
-            <Timeline />
+            <Timeline color={timelineColor} />
           </Animated.View>
-          <TimeIndicator />
+          <TimeIndicator color={tintColor} />
         </View>
       </GestureDetector>
     </GestureHandlerRootView>
@@ -160,7 +176,6 @@ const $waveformLine: ViewStyle = {
 
 const $background: ViewStyle = {
   position: 'absolute',
-  backgroundColor: 'red',
   left: 0,
   right: 0,
   height: WAVEFORM_CONTAINER_HEIGHT,
