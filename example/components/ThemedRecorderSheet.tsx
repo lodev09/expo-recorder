@@ -58,12 +58,14 @@ export const ThemedRecorderSheet = forwardRef(
     const recorderRef = useRef<RecorderRef>(null)
 
     const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'recorderSheet')
+    const progressBackgroundColor = useThemeColor({}, 'recorderProgress')
     const iconColor = useThemeColor({}, 'recorderIcon')
     const tintColor = useThemeColor({}, 'recorderTint')
     const timelineColor = useThemeColor({}, 'recorderTimeline')
     const positionColor = useThemeColor({}, 'text')
     const recordBorderColor = useThemeColor({ light: 'rgba(0,0,0,0.3)' }, 'text')
     const recorderBackgroundColor = useThemeColor({}, 'recorderBackground')
+    const waveformInactiveColor = useThemeColor({}, 'recorderWaveformInactive')
 
     const scale = useSharedValue(1)
 
@@ -121,8 +123,11 @@ export const ThemedRecorderSheet = forwardRef(
         <Recorder
           ref={recorderRef}
           tintColor={tintColor}
+          waveformInactiveColor={waveformInactiveColor}
+          progressInterval={50}
           timelineColor={timelineColor}
           backgroundColor={recorderBackgroundColor}
+          progressBackgroundColor={progressBackgroundColor}
           onRecordReset={() => {
             scale.value = 1
             setIsRecording(false)
@@ -141,7 +146,7 @@ export const ThemedRecorderSheet = forwardRef(
           }}
           onPlaybackStart={() => setIsPlaying(true)}
           onPlaybackStop={() => setIsPlaying(false)}
-          onPositionChange={(position: number) => setPosition(position)}
+          onPositionChange={(pos: number) => setPosition(pos)}
         />
         <View style={{ padding: Spacing.md, marginTop: Spacing.xxl }}>
           <Text style={[$positionText, { color: positionColor ?? '#333333' }]}>

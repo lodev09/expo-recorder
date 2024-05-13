@@ -1,26 +1,21 @@
 import React, { memo } from 'react'
 import { View, type TextStyle, type ViewStyle, Text, type ColorValue } from 'react-native'
 
-import {
-  TIMELINES,
-  TIMELINE_GAP_PER_250_MS,
-  TIMELINE_HEIGHT,
-  WAVEFORM_LINE_WIDTH,
-  formatSeconds,
-  spacing,
-} from '../helpers'
+import { TIMELINES, WAVEFORM_LINE_WIDTH, formatSeconds, spacing } from '../helpers'
 
+const TIMELINE_HEIGHT = spacing.xl
 const DEFAULT_COLOR = 'rgba(0, 0, 0, 0.5)'
 
 interface TimelineProps {
   color?: ColorValue
+  gap: number
 }
 
-export const Timeline = memo(({ color }: TimelineProps) => {
+export const Timeline = memo(({ color, gap }: TimelineProps) => {
   const timelineColor = color ?? DEFAULT_COLOR
 
   return (
-    <View style={$container}>
+    <View style={[$container, { gap }]}>
       {TIMELINES.map((lineMs) => {
         const isSeconds = lineMs % 4 === 0
         const height = isSeconds ? spacing.sm : spacing.xs
@@ -48,8 +43,7 @@ const $timelineSeconds: TextStyle = {
 
 const $container: ViewStyle = {
   position: 'absolute',
-  bottom: -TIMELINE_HEIGHT,
   flexDirection: 'row',
   height: TIMELINE_HEIGHT,
-  gap: TIMELINE_GAP_PER_250_MS,
+  bottom: -TIMELINE_HEIGHT,
 }

@@ -20,22 +20,24 @@ import { Waveform } from './components'
 import {
   MAX_RECORDING_TIME,
   METERING_MIN_POWER,
-  RECORDING_INDICATOR_SCALE,
   SPRING_CONFIG,
-  SPRING_SHORT_CONFIG,
   TIMELINE_MS_PER_LINE,
-  TIMELINE_TOTAL_WIDTH_PER_250_MS,
-  TIMELINE_UPDATE_INTERVAL,
+  spacing,
 } from './helpers'
+
+const DEFAULT_TIMELINE_GAP_PER_250_MS = spacing.lg
+const DEFAULT_TIMELINE_UPDATE_INTERVAL = 50 // ms
 
 export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>) => {
   const {
+    progressInterval = DEFAULT_TIMELINE_UPDATE_INTERVAL,
     onPositionChange,
     onRecordStart,
     onRecordStop,
     onRecordReset,
     onPlaybackStart,
     onPlaybackStop,
+    timelineGap = DEFAULT_TIMELINE_GAP_PER_250_MS,
     ...rest
   } = props
 
@@ -50,11 +52,10 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
 
-  const waveformMaxWidth = (duration / TIMELINE_MS_PER_LINE) * TIMELINE_TOTAL_WIDTH_PER_250_MS
+  const waveformMaxWidth = (duration / TIMELINE_MS_PER_LINE) * timelineGap
 
   const isScrollAnimating = useSharedValue(false)
   const scrollX = useSharedValue(0)
-  const scale = useSharedValue(1)
   const currentMs = useSharedValue(0)
 
   const updatePosition = (positionMs: number) => {
@@ -69,9 +70,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
     if (scrollX.value <= 0) {
       const ms =
-        Math.floor(
-          ((Math.abs(scrollX.value) / TIMELINE_TOTAL_WIDTH_PER_250_MS) * TIMELINE_MS_PER_LINE) / 100
-        ) * 100
+        Math.floor(((Math.abs(scrollX.value) / timelineGap) * TIMELINE_MS_PER_LINE) / 100) * 100
 
       if (ms <= duration && ms !== currentMs.value) {
         runOnJS(updatePosition)(ms)
@@ -135,7 +134,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       playsInSilentModeIOS: true,
     })
 
-    newRecording.setProgressUpdateInterval(TIMELINE_UPDATE_INTERVAL)
+    newRecording.setProgressUpdateInterval(progressInterval)
     newRecording.setOnRecordingStatusUpdate(handleRecordingStatus)
 
     await newRecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
@@ -202,7 +201,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus)
 
         await newSound.loadAsync({ uri })
-        await newSound.setProgressUpdateIntervalAsync(TIMELINE_UPDATE_INTERVAL)
+        await newSound.setProgressUpdateIntervalAsync(progressInterval)
 
         // Sync position and duration ms
         const currentStatus = await newSound.getStatusAsync()
@@ -229,15 +228,15 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   useEffect(() => {
     if (isRecording) {
-      scrollX.value = withTiming(-waveformMaxWidth, { duration: TIMELINE_UPDATE_INTERVAL })
+      scrollX.value = withTiming(-waveformMaxWidth, { duration: progressInterval })
     }
   }, [isRecording, waveformMaxWidth])
 
   useEffect(() => {
     if (isPreviewPlaying) {
-      const x = (position / TIMELINE_MS_PER_LINE) * TIMELINE_TOTAL_WIDTH_PER_250_MS
+      const x = (position / TIMELINE_MS_PER_LINE) * timelineGap
       scrollX.value = withTiming(-Math.min(x, waveformMaxWidth), {
-        duration: TIMELINE_UPDATE_INTERVAL,
+        duration: progressInterval,
       })
     }
   }, [isPreviewPlaying, position])
@@ -250,10 +249,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   useEffect(() => {
     if (isRecording) {
-      scale.value = withSpring(RECORDING_INDICATOR_SCALE, SPRING_SHORT_CONFIG)
       scrollX.value = withSpring(0, SPRING_CONFIG)
-    } else {
-      scale.value = withSpring(1, SPRING_SHORT_CONFIG)
     }
   }, [isRecording])
 
@@ -304,6 +300,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   return (
     <Waveform
+      timelineGap={timelineGap}
       meterings={isRecording ? meterings.slice(-60) : meterings}
       waveformMaxWidth={waveformMaxWidth}
       recording={isRecording}

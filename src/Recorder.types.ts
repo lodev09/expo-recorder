@@ -8,15 +8,54 @@ export interface PlaybackStatus {
 export interface RecorderProps extends Omit<ViewProps, 'children'> {
   /**
    * The main background color of the waveform container.
-   * Tip: pass in an RGBA color.
    */
   backgroundColor?: ColorValue
+
+  /**
+   * The background color of the recording progress.
+   */
+  progressBackgroundColor?: ColorValue
+
+  /**
+   * The progress update interval while recording.
+   * In milliseconds
+   *
+   * @default 50
+   */
+  progressInterval?: number
+
+  /**
+   * Height of the wave form
+   * @default 160
+   */
+  waveformHeight?: number
+
+  /**
+   * The waveform active tint color
+   *
+   * @default #d72d66
+   */
+  waveformActiveColor?: ColorValue
+
+  /**
+   * Inactive waveform color
+   *
+   * @default #7987a0
+   */
+  waveformInactiveColor?: ColorValue
 
   /**
    * Tint color used on the time indicator.
    * @type {[type]}
    */
   tintColor?: ColorValue
+
+  /**
+   * The gap between timelines per 250ms.
+   *
+   * @default 24
+   */
+  timelineGap?: number
 
   /**
    * The color of the timeline.

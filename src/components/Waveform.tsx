@@ -23,25 +23,32 @@ import {
   METERING_MAX_POWER,
   METERING_MIN_POWER,
   TIMELINE_MS_PER_LINE,
-  TIMELINE_TOTAL_WIDTH_PER_250_MS,
-  WAVEFORM_CONTAINER_HEIGHT,
   WAVEFORM_LINE_WIDTH,
-  WAVEFORM_MAX_HEIGHT,
-  WAVEFORM_TINT_COLOR,
+  spacing,
 } from '../helpers'
 import { TimeIndicator } from './TimeIndicator'
 import { Timeline } from './Timeline'
 
-const DEFAULT_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.2)'
+const DEFAULT_WAVEFORM_ACTIVE_COLOR = '#d72d66'
+const DEFAULT_WAVEFORM_INACTIVE_COLOR = 'rgba(0, 0, 0, 0.4)'
+
+const DEFAULT_WAVEFORM_HEIGHT = 160
+const DEFAULT_BACKGROUND_COLOR = '#f9f9f9'
+const DEFAULT_PROGRESS_BACKGROUND_COLOR = '#bbbbbb'
 
 interface WaveformProps extends ViewProps {
-  backgroundColor?: ColorValue
-  tintColor?: ColorValue
-  timelineColor?: ColorValue
   meterings: Metering[]
   recording: boolean
   playing: boolean
   waveformMaxWidth: number
+  timelineGap: number
+  timelineColor?: ColorValue
+  waveformHeight?: number
+  waveformActiveColor?: ColorValue
+  waveformInactiveColor?: ColorValue
+  backgroundColor?: ColorValue
+  progressBackgroundColor?: ColorValue
+  tintColor?: ColorValue
   scrollX: SharedValue<number>
 }
 
@@ -49,32 +56,39 @@ interface WaveformLineProps {
   position: number
   db: number
   color: ColorValue
+  maxHeight: number
+  gap: number
 }
 
 export const Waveform = (props: WaveformProps) => {
   const {
-    backgroundColor,
-    tintColor,
-    timelineColor,
     scrollX,
-    waveformMaxWidth,
     meterings = [],
     recording,
     playing,
-    ...rest
+    backgroundColor = DEFAULT_BACKGROUND_COLOR,
+    progressBackgroundColor = DEFAULT_PROGRESS_BACKGROUND_COLOR,
+    tintColor,
+    timelineColor,
+    timelineGap,
+    waveformMaxWidth,
+    waveformHeight = DEFAULT_WAVEFORM_HEIGHT,
+    waveformActiveColor = DEFAULT_WAVEFORM_ACTIVE_COLOR,
+    waveformInactiveColor = DEFAULT_WAVEFORM_INACTIVE_COLOR,
+    style,
   } = props
 
   const dimensions = useWindowDimensions()
-
-  const waveformBackgroundColor = backgroundColor ?? DEFAULT_BACKGROUND_COLOR
+  const waveformContainerHeight = waveformHeight + spacing.md * 2
 
   const prevScrollX = useSharedValue(0)
 
   const $waveformWrapper: StyleProp<ViewStyle> = [
     {
-      height: WAVEFORM_CONTAINER_HEIGHT,
+      height: waveformContainerHeight,
       left: dimensions.width / 2 - WAVEFORM_LINE_WIDTH / 2,
     },
+    style,
     useAnimatedStyle(() => ({
       transform: [
         {
@@ -87,7 +101,8 @@ export const Waveform = (props: WaveformProps) => {
   const $waveformLineStyles: StyleProp<ViewStyle> = [
     $waveformLines,
     {
-      backgroundColor: waveformBackgroundColor,
+      backgroundColor: progressBackgroundColor,
+      height: waveformContainerHeight,
       width: waveformMaxWidth,
     },
   ]
@@ -115,28 +130,38 @@ export const Waveform = (props: WaveformProps) => {
   return (
     <GestureHandlerRootView style={$gestureHandler}>
       <GestureDetector gesture={pan}>
-        <View {...rest}>
-          <View style={[$background, { backgroundColor: waveformBackgroundColor }]} />
+        <View>
+          <View
+            style={[$waveformBackground, { height: waveformContainerHeight, backgroundColor }]}
+          />
           <Animated.View style={$waveformWrapper}>
             <View style={$waveformLineStyles}>
-              {meterings.map(({ position, key, db }, index, arr) => (
+              {meterings.map(({ position, key, db }) => (
                 <WaveformLine
                   key={key}
+                  gap={timelineGap}
                   position={position}
                   db={db}
-                  color={
-                    recording
-                      ? index === arr.length - 1
-                        ? waveformBackgroundColor
-                        : WAVEFORM_TINT_COLOR
-                      : 'gray'
-                  }
+                  maxHeight={waveformHeight}
+                  color={recording ? waveformActiveColor : waveformInactiveColor}
                 />
               ))}
             </View>
-            <Timeline color={timelineColor} />
+            <Timeline gap={timelineGap} color={timelineColor} />
           </Animated.View>
-          <TimeIndicator color={tintColor} />
+          {recording && (
+            <View
+              style={[
+                $progressCover,
+                {
+                  backgroundColor,
+                  height: waveformContainerHeight,
+                  left: dimensions.width / 2,
+                },
+              ]}
+            />
+          )}
+          <TimeIndicator height={waveformContainerHeight} color={tintColor} />
         </View>
       </GestureDetector>
     </GestureHandlerRootView>
@@ -144,18 +169,21 @@ export const Waveform = (props: WaveformProps) => {
 }
 
 const WaveformLine = memo((props: WaveformLineProps) => {
-  const { db, color, position } = props
+  const { db, maxHeight, gap, color, position } = props
+
+  const timelineTotalWidthPer250ms = gap + WAVEFORM_LINE_WIDTH
+
   return (
     <View
       style={[
         $waveformLine,
         {
           backgroundColor: color,
-          left: (position / TIMELINE_MS_PER_LINE) * TIMELINE_TOTAL_WIDTH_PER_250_MS,
+          left: (position / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms,
           height: interpolate(
             db,
             [METERING_MIN_POWER, METERING_MAX_POWER],
-            [1, WAVEFORM_MAX_HEIGHT],
+            [1, maxHeight],
             Extrapolation.CLAMP
           ),
         },
@@ -169,7 +197,6 @@ const $gestureHandler: ViewStyle = {
 }
 
 const $waveformLines: ViewStyle = {
-  height: WAVEFORM_CONTAINER_HEIGHT,
   position: 'absolute',
   flexDirection: 'row',
   alignItems: 'center',
@@ -180,9 +207,14 @@ const $waveformLine: ViewStyle = {
   width: WAVEFORM_LINE_WIDTH,
 }
 
-const $background: ViewStyle = {
+const $waveformBackground: ViewStyle = {
   position: 'absolute',
   left: 0,
   right: 0,
-  height: WAVEFORM_CONTAINER_HEIGHT,
+}
+
+const $progressCover: ViewStyle = {
+  position: 'absolute',
+  backgroundColor: 'red',
+  right: 0,
 }
