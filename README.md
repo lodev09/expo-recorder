@@ -4,13 +4,21 @@ Audio recorder for your React Native apps 🎙️
 
 <img alt="Expo Recorder" src="preview.gif" width="300px" />
 
-This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/). Features an animated Waveform for your recording needs. 💪
+This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/) and features an animated waveform for your recording needs. 💪
 
 ## Installation
 
 ```sh
 npx expo install @lodev09/expo-recorder react-native-reanimated react-native-gesture-handler
 ```
+
+### Dependencies
+
+You might want to check out the individual installation instructions from this package's dependencies.
+
+* [`expo-av`](https://docs.expo.dev/versions/latest/sdk/av/)
+* [`react-native-reanimated`](https://docs.swmansion.com/react-native-reanimated/)
+* [`react-native-gesture-handler`](https://docs.swmansion.com/react-native-gesture-handler/docs/)
 
 ## Usage
 
