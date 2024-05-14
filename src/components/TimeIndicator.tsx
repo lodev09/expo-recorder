@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { View, type ColorValue, type ViewStyle } from 'react-native'
 
-import { spacing } from '../helpers'
+import { Spacing } from '../helpers'
 
 interface TimeIndicatorProps {
   color?: ColorValue
@@ -29,9 +29,9 @@ const $lineIndicator: ViewStyle = {
 const $dot: ViewStyle = {
   position: 'absolute',
   alignSelf: 'center',
-  height: spacing.xs,
-  width: spacing.xs,
-  borderRadius: spacing.xs / 2,
+  height: Spacing.xs,
+  width: Spacing.xs,
+  borderRadius: Spacing.xs / 2,
 }
 
 const $top: ViewStyle = { top: 0 }

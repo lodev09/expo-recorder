@@ -24,7 +24,7 @@ import {
   METERING_MIN_POWER,
   TIMELINE_MS_PER_LINE,
   WAVEFORM_LINE_WIDTH,
-  spacing,
+  Spacing,
 } from '../helpers'
 import { TimeIndicator } from './TimeIndicator'
 import { Timeline } from './Timeline'
@@ -38,6 +38,7 @@ const DEFAULT_PROGRESS_BACKGROUND_COLOR = '#bbbbbb'
 
 interface WaveformProps extends ViewProps {
   meterings: Metering[]
+  maxDuration: number
   recording: boolean
   playing: boolean
   waveformMaxWidth: number
@@ -68,6 +69,7 @@ export const Waveform = (props: WaveformProps) => {
     playing,
     backgroundColor = DEFAULT_BACKGROUND_COLOR,
     progressBackgroundColor = DEFAULT_PROGRESS_BACKGROUND_COLOR,
+    maxDuration,
     tintColor,
     timelineColor,
     timelineGap,
@@ -79,7 +81,7 @@ export const Waveform = (props: WaveformProps) => {
   } = props
 
   const dimensions = useWindowDimensions()
-  const waveformContainerHeight = waveformHeight + spacing.md * 2
+  const waveformContainerHeight = waveformHeight + Spacing.md * 2
 
   const prevScrollX = useSharedValue(0)
 
@@ -147,7 +149,7 @@ export const Waveform = (props: WaveformProps) => {
                 />
               ))}
             </View>
-            <Timeline gap={timelineGap} color={timelineColor} />
+            <Timeline duration={maxDuration} gap={timelineGap} color={timelineColor} />
           </Animated.View>
           {recording && (
             <View

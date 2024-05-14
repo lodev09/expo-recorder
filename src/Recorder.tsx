@@ -18,15 +18,15 @@ import {
 import type { Metering, PlaybackStatus, RecorderProps, RecorderRef } from './Recorder.types'
 import { Waveform } from './components'
 import {
-  MAX_RECORDING_TIME,
   METERING_MIN_POWER,
   SPRING_CONFIG,
   TIMELINE_MS_PER_LINE,
   WAVEFORM_LINE_WIDTH,
-  spacing,
+  Spacing,
 } from './helpers'
 
-const DEFAULT_TIMELINE_GAP_PER_250_MS = spacing.lg
+const DEFAULT_MAX_DURATION = 120000 // 2m
+const DEFAULT_TIMELINE_GAP_PER_250_MS = Spacing.lg
 const DEFAULT_TIMELINE_UPDATE_INTERVAL = 50 // ms
 
 export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>) => {
@@ -39,6 +39,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     onPlaybackStart,
     onPlaybackStop,
     timelineGap = DEFAULT_TIMELINE_GAP_PER_250_MS,
+    maxDuration = DEFAULT_MAX_DURATION,
     ...rest
   } = props
 
@@ -104,7 +105,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     if (status.isRecording && status.durationMillis > 0) {
       setDuration(status.durationMillis)
 
-      if (status.durationMillis > MAX_RECORDING_TIME) {
+      if (status.durationMillis > maxDuration) {
         return
       }
 
@@ -246,10 +247,10 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   }, [isPreviewPlaying, position])
 
   useEffect(() => {
-    if (isRecording && duration >= MAX_RECORDING_TIME) {
+    if (isRecording && duration >= maxDuration) {
       stopRecording()
     }
-  }, [duration, isRecording])
+  }, [duration, isRecording, maxDuration])
 
   useEffect(() => {
     if (isRecording) {
@@ -305,6 +306,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   return (
     <Waveform
       timelineGap={timelineGap}
+      maxDuration={maxDuration}
       meterings={isRecording ? meterings.slice(-60) : meterings}
       waveformMaxWidth={waveformMaxWidth}
       recording={isRecording}

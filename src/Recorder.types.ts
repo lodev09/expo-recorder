@@ -25,6 +25,13 @@ export interface RecorderProps extends Omit<ViewProps, 'children'> {
   progressInterval?: number
 
   /**
+   * The maximum recording duration in milliseconds.
+   *
+   * @default 120000
+   */
+  maxDuration?: number
+
+  /**
    * Height of the wave form
    * @default 160
    */

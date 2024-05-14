@@ -1,3 +1,3 @@
-export * from './spacing'
+export * from './Spacing'
 export * from './constants'
 export * from './formatSeconds'
