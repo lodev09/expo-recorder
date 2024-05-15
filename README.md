@@ -6,6 +6,11 @@ Audio recorder for your React Native apps 🎙️
 
 This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/) and features an animated waveform for your recording needs. 💪
 
+> [!NOTE]
+> This package is mostly subjective and might not fit your use case and/or design.
+>
+> I will try to make this as generic as possible, but if you want a very customized experience, feel free to copy its source code. Alternatively, you could submit a PR if you think it will help the general public. See [contributing](#contributing) to get started.
+
 ## Installation
 
 ```sh
