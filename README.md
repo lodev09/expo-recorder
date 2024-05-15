@@ -9,10 +9,14 @@ This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/v
 ## Installation
 
 ```sh
-npx expo install @lodev09/expo-recorder react-native-reanimated react-native-gesture-handler
+npx expo install @lodev09/expo-recorder
 ```
 
 ### Dependencies
+
+```sh
+npx expo install expo-av react-native-reanimated react-native-gesture-handler
+```
 
 You might want to check out the individual installation instructions from this package's dependencies.
 

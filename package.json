@@ -58,9 +58,6 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "dependencies": {
-    "expo-av": "*"
-  },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
@@ -88,6 +85,7 @@
     "@types/react": "^18.2.44"
   },
   "peerDependencies": {
+    "expo-av": "*",
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": "^2",
