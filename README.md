@@ -1,15 +1,14 @@
 # Expo Recorder
 
-Audio recorder for your React Native apps 🎙️
+Audio recorder for your React Native apps 🎙️<br>
+This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/) and features an animated waveform for your recording needs. 💪
 
 <img alt="Expo Recorder" src="preview.gif" width="300px" />
-
-This is a wrapper component that implements [Expo Audio](https://docs.expo.dev/versions/latest/sdk/audio/) and features an animated waveform for your recording needs. 💪
 
 > [!NOTE]
 > This package is mostly subjective and might not fit your use case and/or design.
 >
-> I will try to make this as generic as possible, but if you want a very customized experience, feel free to copy its source code. Alternatively, you could submit a PR if you think it will help the general public. See [contributing](#contributing) to get started.
+> I will try to make this as generic as possible, but if you want a very customized experience, feel free to copy its code and customize it the way you want. Alternatively, you could submit a PR if you think it will help the general public. See the [contributing guide](CONTRIBUTING.md) to get started.
 
 ## Installation
 
@@ -60,7 +59,9 @@ const App = () => {
 }
 ```
 
-For more advanced usage, see [example](example/components/ThemedRecorderSheet.tsx).
+For complete usage, see [example](example/components/ThemedRecorderSheet.tsx).
+
+Also check out [`react-native-true-sheet`](https://github.com/lodev09/react-native-true-sheet), the **Bottom Sheet** used in this example.
 
 ## Contributing
 
