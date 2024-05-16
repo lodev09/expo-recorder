@@ -195,40 +195,36 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     if (!isRecording) return
     if (!recording.current) return
 
-    try {
-      await recording.current?.stopAndUnloadAsync()
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
+    await recording.current?.stopAndUnloadAsync()
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
 
-      let durationMillis: number | undefined
-      const uri = recording.current?.getURI()
-      if (uri) {
-        const newSound = new Audio.Sound()
-        newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus)
+    let durationMillis: number | undefined
+    const uri = recording.current?.getURI()
+    if (uri) {
+      const newSound = new Audio.Sound()
+      newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus)
 
-        await newSound.loadAsync({ uri })
-        await newSound.setProgressUpdateIntervalAsync(progressInterval)
+      await newSound.loadAsync({ uri })
+      await newSound.setProgressUpdateIntervalAsync(progressInterval)
 
-        // Sync position and duration ms
-        const currentStatus = await newSound.getStatusAsync()
-        if (currentStatus.isLoaded) {
-          durationMillis = currentStatus.durationMillis ?? duration
-          await newSound.setPositionAsync(durationMillis)
+      // Sync position and duration ms
+      const currentStatus = await newSound.getStatusAsync()
+      if (currentStatus.isLoaded) {
+        durationMillis = currentStatus.durationMillis ?? duration
+        await newSound.setPositionAsync(durationMillis)
 
-          updatePosition(durationMillis)
-          setDuration(durationMillis)
-        }
-
-        sound.current = newSound
-        recordingUri.current = uri
+        updatePosition(durationMillis)
+        setDuration(durationMillis)
       }
 
-      onRecordStop?.(uri, durationMillis)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      recording.current = undefined
-      setIsRecording(false)
+      sound.current = newSound
+      recordingUri.current = uri
     }
+
+    recording.current = undefined
+    setIsRecording(false)
+
+    onRecordStop?.(uri, durationMillis, meterings)
   }
 
   useEffect(() => {

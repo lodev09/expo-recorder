@@ -137,12 +137,17 @@ export const ThemedRecorderSheet = forwardRef(
             scale.value = withSpring(RECORDING_INDICATOR_SCALE, SPRING_SHORT_CONFIG)
             setIsRecording(true)
           }}
-          onRecordStop={(uri) => {
+          onRecordStop={(uri, duration, meterings) => {
             scale.value = withSpring(1, SPRING_SHORT_CONFIG)
             setIsRecording(false)
 
+            recorderRef.current?.startPlayback()
+
             // Use this uri. Yay! 🎉
             console.log(uri)
+
+            console.log(duration)
+            console.log(meterings)
           }}
           onPlaybackStart={() => setIsPlaying(true)}
           onPlaybackStop={() => setIsPlaying(false)}
