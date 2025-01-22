@@ -75,9 +75,22 @@ export const ThemedRecorderSheet = forwardRef(
 
       Haptics.selectionAsync()
       if (isRecording) {
-        await recorderRef.current?.stopRecording()
+        const record = await recorderRef.current?.stopRecording()
+
+        scale.value = withSpring(1, SPRING_SHORT_CONFIG)
+        setIsRecording(false)
+
+        recorderRef.current?.startPlayback()
+
+        // Use this uri. Yay! 🎉
+        console.log(record?.uri)
+        console.log(record?.duration)
+        // console.log(record?.meterings)
       } else {
         await recorderRef.current?.startRecording()
+
+        scale.value = withSpring(RECORDING_INDICATOR_SCALE, SPRING_SHORT_CONFIG)
+        setIsRecording(true)
       }
     }
 
@@ -132,22 +145,6 @@ export const ThemedRecorderSheet = forwardRef(
             scale.value = 1
             setIsRecording(false)
             setIsPlaying(false)
-          }}
-          onRecordStart={() => {
-            scale.value = withSpring(RECORDING_INDICATOR_SCALE, SPRING_SHORT_CONFIG)
-            setIsRecording(true)
-          }}
-          onRecordStop={(uri, duration, meterings) => {
-            scale.value = withSpring(1, SPRING_SHORT_CONFIG)
-            setIsRecording(false)
-
-            recorderRef.current?.startPlayback()
-
-            // Use this uri. Yay! 🎉
-            console.log(uri)
-
-            console.log(duration)
-            console.log(meterings)
           }}
           onPlaybackStart={() => setIsPlaying(true)}
           onPlaybackStop={() => setIsPlaying(false)}

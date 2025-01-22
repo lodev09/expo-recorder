@@ -12,7 +12,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@lodev09/expo-recorder": "workspace:^",
-    "@lodev09/react-native-true-sheet": "^0.11.2",
+    "@lodev09/react-native-true-sheet": "^1.0.3",
     "@react-navigation/native": "^6.0.2",
     "date-fns": "^3.6.0",
     "expo": "~51.0.7",

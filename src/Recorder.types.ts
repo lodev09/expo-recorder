@@ -5,6 +5,18 @@ export interface PlaybackStatus {
   duration?: number
 }
 
+export interface Metering {
+  position: number
+  key: number
+  db: number
+}
+
+export interface RecordInfo {
+  uri?: string | null
+  duration?: number
+  meterings?: Metering[]
+}
+
 export interface RecorderProps extends Omit<ViewProps, 'children'> {
   /**
    * The main background color of the waveform container.
@@ -77,16 +89,15 @@ export interface RecorderProps extends Omit<ViewProps, 'children'> {
 
   /**
    * Called when record has started.
-   * @param position - the current position it started.
+   * @param event - the event data
    */
-  onRecordStart?: (uri?: string | null) => void
+  onRecordStart?: (event: RecordInfo) => void
 
   /**
    * Called when record has stopped.
-   * @param position - the current position it stopped.
-   * @param duration - the duration of the recording
+   * @param event - the event data
    */
-  onRecordStop?: (uri?: string | null, duration?: number, meterings?: Metering[]) => void
+  onRecordStop?: (event: RecordInfo) => void
 
   /**
    * Called when recording has been reset.
@@ -107,15 +118,9 @@ export interface RecorderProps extends Omit<ViewProps, 'children'> {
 }
 
 export interface RecorderRef {
-  startRecording: () => Promise<void>
-  stopRecording: () => Promise<void>
+  startRecording: () => Promise<RecordInfo | undefined>
+  stopRecording: () => Promise<RecordInfo | undefined>
   resetRecording: () => Promise<void>
   startPlayback: () => Promise<void>
   stopPlayback: () => Promise<void>
-}
-
-export interface Metering {
-  position: number
-  key: number
-  db: number
 }

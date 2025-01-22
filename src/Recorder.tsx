@@ -15,7 +15,13 @@ import {
   withTiming,
 } from 'react-native-reanimated'
 
-import type { Metering, PlaybackStatus, RecorderProps, RecorderRef } from './Recorder.types'
+import type {
+  Metering,
+  PlaybackStatus,
+  RecordInfo,
+  RecorderProps,
+  RecorderRef,
+} from './Recorder.types'
 import { Waveform } from './components'
 import {
   METERING_MIN_POWER,
@@ -144,7 +150,11 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
     await newRecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
     const status = await newRecording.startAsync()
-    onRecordStart?.(status.uri)
+
+    const event: RecordInfo = { uri: status.uri }
+    onRecordStart?.(event)
+
+    return event
   }
 
   const reset = async () => {
@@ -191,7 +201,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     setisPreviewPlaying(true)
   }
 
-  const stopRecording = async () => {
+  const stop = async () => {
     if (!isRecording) return
     if (!recording.current) return
 
@@ -224,7 +234,14 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     recording.current = undefined
     setIsRecording(false)
 
-    onRecordStop?.(uri, durationMillis, meterings)
+    const event: RecordInfo = {
+      uri,
+      duration: durationMillis,
+      meterings,
+    }
+
+    onRecordStop?.(event)
+    return event
   }
 
   useEffect(() => {
@@ -244,7 +261,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   useEffect(() => {
     if (isRecording && duration >= maxDuration) {
-      stopRecording()
+      stop()
     }
   }, [duration, isRecording, maxDuration])
 
@@ -257,12 +274,17 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   useImperativeHandle(ref, () => ({
     startRecording: async () => {
       if (meterings.length > 0) {
-        resetScroll(record)
+        return new Promise((resolve) => {
+          resetScroll(async () => {
+            const info = await record()
+            resolve(info)
+          })
+        })
       } else {
-        await record()
+        return await record()
       }
     },
-    stopRecording,
+    stopRecording: stop,
     resetRecording: async () => {
       if (isRecording) return
 

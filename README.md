@@ -37,23 +37,21 @@ import { Recorder, type RecorderRef } from '@lodev09/expo-recorder'
 const App = () => {
   const recorder = useRef<RecorderRef>(null)
 
-  const startRecord = () => {
-    recorder.current?.startRecording()
+  const startRecording = async () => {
+    const record = await recorder.current?.startRecording()
+    console.log(record.uri)
   }
 
-  const stopRecord = () => {
-    recorder.current?.stopRecording()
-  }
-
-  const recordingStopped = (uri?: string) => {
-    console.log(uri) // Save the uri somewhere! 🎉
+  const stopRecording = async () => {
+    const record = await recorder.current?.stopRecording()
+    console.log(record.uri) // Save the uri somewhere! 🎉
   }
 
   return (
     <View>
-      <Recorder ref={recorder} onRecordStop={recordingStopped} />
-      <Button title="Record" onPress={startRecord} />
-      <Button title="Stop" onPress={stopRecord} />
+      <Recorder ref={recorder} />
+      <Button title="Record" onPress={startRecording} />
+      <Button title="Stop" onPress={stopRecording} />
     </View>
   )
 }

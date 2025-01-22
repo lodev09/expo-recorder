@@ -61,7 +61,7 @@ interface WaveformLineProps {
   gap: number
 }
 
-export const Waveform = (props: WaveformProps) => {
+export const Waveform = memo((props: WaveformProps) => {
   const {
     scrollX,
     meterings = [],
@@ -168,7 +168,7 @@ export const Waveform = (props: WaveformProps) => {
       </GestureDetector>
     </GestureHandlerRootView>
   )
-}
+})
 
 const WaveformLine = memo((props: WaveformLineProps) => {
   const { db, maxHeight, gap, color, position } = props
