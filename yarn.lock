@@ -2921,13 +2921,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lodev09/react-native-true-sheet@npm:^0.11.2":
-  version: 0.11.2
-  resolution: "@lodev09/react-native-true-sheet@npm:0.11.2"
+"@lodev09/react-native-true-sheet@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@lodev09/react-native-true-sheet@npm:1.0.3"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 0efa9331c752868cdb0dce97d7bfae4a3f92eb9c924718acc33b088738353b83e4af77b579c40c5c2f8d7d363fc02a59f9b5763102951858490c4ef4428d4d68
+  checksum: 3786dca46667bb492df0684c267052abc2e1d421d0327eeeed8e0608c5c8453777450ce638ef4b9e0ee0b716b200550f52acf48506a33106ce31c2fd7ed9a869
   languageName: node
   linkType: hard
 
@@ -8870,7 +8870,7 @@ __metadata:
     "@expo/vector-icons": ^14.0.0
     "@expo/webpack-config": ~19.0.1
     "@lodev09/expo-recorder": "workspace:^"
-    "@lodev09/react-native-true-sheet": ^0.11.2
+    "@lodev09/react-native-true-sheet": ^1.0.3
     "@react-navigation/native": ^6.0.2
     babel-loader: ^8.1.0
     babel-plugin-module-resolver: ^5.0.0
