@@ -20,7 +20,7 @@ import Animated, {
   type WithSpringConfig,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Recorder, type RecorderRef } from '@lodev09/expo-recorder'
+import { Recorder, type RecordInfo, type RecorderRef } from '@lodev09/expo-recorder'
 import { type TrueSheetProps, TrueSheet } from '@lodev09/react-native-true-sheet'
 
 import { useThemeColor } from '@/hooks/useThemeColor'
@@ -69,6 +69,18 @@ export const ThemedRecorderSheet = forwardRef(
 
     const scale = useSharedValue(1)
 
+    const handleRecordStop = (record?: RecordInfo) => {
+      scale.value = withSpring(1, SPRING_SHORT_CONFIG)
+      setIsRecording(false)
+
+      recorderRef.current?.startPlayback()
+
+      // Use this uri. Yay! 🎉
+      console.log(record?.uri)
+      console.log(record?.duration)
+      // console.log(record?.meterings)
+    }
+
     const toggleRecording = async () => {
       const permissionStatus = await Audio.getPermissionsAsync()
       if (!permissionStatus.granted) return
@@ -76,16 +88,7 @@ export const ThemedRecorderSheet = forwardRef(
       Haptics.selectionAsync()
       if (isRecording) {
         const record = await recorderRef.current?.stopRecording()
-
-        scale.value = withSpring(1, SPRING_SHORT_CONFIG)
-        setIsRecording(false)
-
-        recorderRef.current?.startPlayback()
-
-        // Use this uri. Yay! 🎉
-        console.log(record?.uri)
-        console.log(record?.duration)
-        // console.log(record?.meterings)
+        handleRecordStop(record)
       } else {
         await recorderRef.current?.startRecording()
 
@@ -141,6 +144,7 @@ export const ThemedRecorderSheet = forwardRef(
           timelineColor={timelineColor}
           backgroundColor={recorderBackgroundColor}
           progressBackgroundColor={progressBackgroundColor}
+          onRecordStop={handleRecordStop}
           onRecordReset={() => {
             scale.value = 1
             setIsRecording(false)
