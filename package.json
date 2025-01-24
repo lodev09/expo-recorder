@@ -1,6 +1,6 @@
 {
   "name": "@lodev09/expo-recorder",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Audio recorder for your React Native apps ⏺️",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
