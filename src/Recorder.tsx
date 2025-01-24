@@ -289,9 +289,14 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       if (isRecording) return
 
       if (meterings.length > 0) {
-        resetScroll(reset)
+        return new Promise((resolve) => {
+          resetScroll(async () => {
+            await reset()
+            resolve()
+          })
+        })
       } else {
-        await reset()
+        return await reset()
       }
     },
     startPlayback: async () => {
@@ -300,9 +305,14 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
       const playPosition = position / 100 < Math.floor(duration / 100) ? position : 0
       if (playPosition === 0) {
-        resetScroll(() => playbackAtPosition(0))
+        return new Promise((resolve) => {
+          resetScroll(async () => {
+            await playbackAtPosition(0)
+            resolve()
+          })
+        })
       } else {
-        await playbackAtPosition(playPosition)
+        return await playbackAtPosition(playPosition)
       }
     },
     stopPlayback: async () => {
