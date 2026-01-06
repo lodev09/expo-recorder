@@ -117,13 +117,14 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   const record = async () => {
     if (isRecording) return
 
-    setMeterings([])
-    updatePosition(0)
-
     await setAudioModeAsync({
       playsInSilentMode: true,
       allowsRecording: true,
+      interruptionMode: 'doNotMix',
     })
+
+    setMeterings([])
+    updatePosition(0)
 
     // Prepare and start recording
     await audioRecorder.prepareToRecordAsync()
@@ -151,8 +152,6 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     updatePosition(0)
     setDuration(0)
 
-    // scrollX.value = withSpring(0, SPRING_CONFIG)
-
     recordingUri.current = undefined
 
     // Remove audio player source
@@ -171,6 +170,12 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
   const playbackAtPosition = async (ms: number) => {
     if (!recordingUri.current) return
+
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: false,
+      interruptionMode: 'doNotMix',
+    })
 
     // Load the audio if not already loaded
     if (!audioPlayer.isLoaded) {
@@ -232,20 +237,6 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     onRecordStop?.(event)
     return event
   }
-
-  // initialize recorder behavior
-  // useEffect(() => {
-  //   ;(async () => {
-  //     const status = await getRecordingPermissionsAsync()
-  //     grantedStatus.current = status.granted
-  //     if (status.granted) {
-  //       setAudioModeAsync({
-  //         playsInSilentMode: true,
-  //         allowsRecording: true,
-  //       })
-  //     }
-  //   })()
-  // }, [])
 
   // handles wave form updates during recording
   useEffect(() => {
