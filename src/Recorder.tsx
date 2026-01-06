@@ -15,13 +15,7 @@ import {
   useAudioPlayerStatus,
   RecordingPresets,
 } from 'expo-audio'
-import {
-  runOnJS,
-  useDerivedValue,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated'
+import { useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 
 import type {
   Metering,
@@ -38,6 +32,7 @@ import {
   WAVEFORM_LINE_WIDTH,
   Spacing,
 } from './helpers'
+import { scheduleOnRN } from 'react-native-worklets'
 
 const DEFAULT_MAX_DURATION = 120000 // 2m
 const DEFAULT_TIMELINE_GAP_PER_250_MS = Spacing.lg
@@ -97,7 +92,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   useDerivedValue(() => {
     if (isPreviewPlaying) return
     if (isRecording) return
-    // if (isScrollAnimating.value) return
+    if (isScrollAnimating.value) return
 
     if (scrollX.value <= 0) {
       const ms =
@@ -106,11 +101,11 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
         ) * 100
 
       if (ms <= duration && ms !== currentMs.value) {
-        runOnJS(updatePosition)(ms)
+        scheduleOnRN(updatePosition, ms)
         currentMs.value = ms
       }
     } else {
-      runOnJS(updatePosition)(0)
+      scheduleOnRN(updatePosition, 0)
     }
   })
 
@@ -164,7 +159,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     isScrollAnimating.value = true
     scrollX.value = withSpring(0, SPRING_CONFIG, () => {
       isScrollAnimating.value = false
-      runOnJS(callback)()
+      scheduleOnRN(callback)
     })
   }
 

@@ -17,7 +17,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  type WithSpringConfig,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Recorder, type RecordInfo, type RecorderRef } from '@lodev09/expo-recorder'
@@ -32,11 +31,6 @@ const RECORD_BUTTON_SIZE = 60
 const RECORD_BUTTON_BACKGROUND_SIZE = RECORD_BUTTON_SIZE + Spacing.md
 const RECORDING_INDICATOR_COLOR = '#d72d66'
 const RECORDING_INDICATOR_SCALE = 0.5
-
-const SPRING_SHORT_CONFIG: WithSpringConfig = {
-  stiffness: 120,
-  overshootClamping: true,
-}
 
 export interface ThemedRecorderSheetProps extends TrueSheetProps {
   lightColor?: string
@@ -70,7 +64,7 @@ export const ThemedRecorderSheet = forwardRef(
     const scale = useSharedValue(1)
 
     const handleRecordStop = (record?: RecordInfo) => {
-      scale.value = withSpring(1, SPRING_SHORT_CONFIG)
+      scale.value = withSpring(1)
       setIsRecording(false)
 
       // Use this uri. Yay! 🎉
@@ -92,7 +86,7 @@ export const ThemedRecorderSheet = forwardRef(
       } else {
         await recorderRef.current?.startRecording()
 
-        scale.value = withSpring(RECORDING_INDICATOR_SCALE, SPRING_SHORT_CONFIG)
+        scale.value = withSpring(RECORDING_INDICATOR_SCALE)
         setIsRecording(true)
       }
     }

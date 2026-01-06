@@ -79,7 +79,8 @@
     "react-native": "0.74.1",
     "react-native-builder-bob": "^0.20.0",
     "react-native-gesture-handler": "~2.16.1",
-    "react-native-reanimated": "~3.10.1",
+    "react-native-reanimated": "~4.0.0",
+    "react-native-worklets-core": "^1.6.2",
     "release-it": "^15.0.0",
     "typescript": "~5.2.0"
   },
@@ -91,7 +92,8 @@
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": "^2",
-    "react-native-reanimated": "^4"
+    "react-native-reanimated": "^4",
+    "react-native-worklets": "*"
   },
   "workspaces": [
     "example"
@@ -164,5 +166,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "react-native-worklets": "^0.7.1"
   }
 }
