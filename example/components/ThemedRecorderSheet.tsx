@@ -8,7 +8,7 @@ import {
   Text,
   type TextStyle,
 } from 'react-native'
-import { Audio } from 'expo-av'
+import { getRecordingPermissionsAsync } from 'expo-audio'
 import * as Haptics from 'expo-haptics'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import Animated, {
@@ -73,8 +73,6 @@ export const ThemedRecorderSheet = forwardRef(
       scale.value = withSpring(1, SPRING_SHORT_CONFIG)
       setIsRecording(false)
 
-      recorderRef.current?.startPlayback()
-
       // Use this uri. Yay! 🎉
       console.log(record?.uri)
       console.log(record?.duration)
@@ -82,10 +80,12 @@ export const ThemedRecorderSheet = forwardRef(
     }
 
     const toggleRecording = async () => {
-      const permissionStatus = await Audio.getPermissionsAsync()
+      const permissionStatus = await getRecordingPermissionsAsync()
+
       if (!permissionStatus.granted) return
 
       Haptics.selectionAsync()
+
       if (isRecording) {
         const record = await recorderRef.current?.stopRecording()
         handleRecordStop(record)

@@ -19,12 +19,12 @@ npx expo install @lodev09/expo-recorder
 ### Dependencies
 
 ```sh
-npx expo install expo-av react-native-reanimated react-native-gesture-handler
+npx expo install expo-audio react-native-reanimated react-native-gesture-handler
 ```
 
 You might want to check out the individual installation instructions from this package's dependencies.
 
-* [`expo-av`](https://docs.expo.dev/versions/latest/sdk/av/)
+* [`expo-audio`](https://docs.expo.dev/versions/latest/sdk/audio/)
 * [`react-native-reanimated`](https://docs.swmansion.com/react-native-reanimated/)
 * [`react-native-gesture-handler`](https://docs.swmansion.com/react-native-gesture-handler/docs/)
 

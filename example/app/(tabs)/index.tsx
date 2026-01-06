@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { Image, StyleSheet } from 'react-native'
-import { Audio } from 'expo-av'
+import { requestRecordingPermissionsAsync } from 'expo-audio'
 
 import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
@@ -13,7 +13,7 @@ const HomeScreen = () => {
   const recorderRef = useRef<ThemedRecorderSheetRef>(null)
 
   const openRecorder = async () => {
-    const permissionStatus = await Audio.requestPermissionsAsync()
+    const permissionStatus = await requestRecordingPermissionsAsync()
     if (!permissionStatus.granted) return
 
     recorderRef.current?.present()

@@ -173,7 +173,7 @@ export const Waveform = memo((props: WaveformProps) => {
 const WaveformLine = memo((props: WaveformLineProps) => {
   const { db, maxHeight, gap, color, position } = props
   return (
-    <View
+    <Animated.View
       style={[
         $waveformLine,
         {

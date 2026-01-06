@@ -5,8 +5,16 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useMemo,
 } from 'react'
-import { type AVPlaybackStatus, Audio } from 'expo-av'
+import {
+  useAudioRecorder,
+  useAudioPlayer,
+  setAudioModeAsync,
+  useAudioRecorderState,
+  useAudioPlayerStatus,
+  RecordingPresets,
+} from 'expo-audio'
 import {
   runOnJS,
   useDerivedValue,
@@ -49,19 +57,33 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     ...rest
   } = props
 
-  const recording = useRef<Audio.Recording>()
-  const sound = useRef<Audio.Sound>()
-  const recordingUri = useRef<string>()
+  const audioRecorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+  })
+  const recorderState = useAudioRecorderState(audioRecorder, progressInterval)
 
-  const [isRecording, setIsRecording] = useState(false)
-  const [isPreviewPlaying, setisPreviewPlaying] = useState(false)
+  const audioPlayer = useAudioPlayer(null, {
+    updateInterval: progressInterval,
+  })
+  const playerStatus = useAudioPlayerStatus(audioPlayer)
+
+  const recordingUri = useRef<string>()
 
   const [meterings, setMeterings] = useState<Metering[]>([])
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
 
+  // Derived from audio hooks
+  const isRecording = recorderState.isRecording && recorderState.isRecording
+  const isPreviewPlaying = playerStatus.playing
+
   const timelineTotalWidthPer250ms = timelineGap + WAVEFORM_LINE_WIDTH
-  const waveformMaxWidth = (duration / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms
+
+  const waveformMaxWidth = useMemo(
+    () => (duration / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms,
+    [duration]
+  )
 
   const isScrollAnimating = useSharedValue(false)
   const scrollX = useSharedValue(0)
@@ -75,7 +97,7 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   useDerivedValue(() => {
     if (isPreviewPlaying) return
     if (isRecording) return
-    if (isScrollAnimating.value) return
+    // if (isScrollAnimating.value) return
 
     if (scrollX.value <= 0) {
       const ms =
@@ -92,89 +114,50 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     }
   })
 
-  const handlePlaybackStatus = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      if (status.didJustFinish) {
-        setisPreviewPlaying(false)
-        onPlaybackStop?.({ position: status.positionMillis, duration: status.durationMillis })
-      } else if (status.isPlaying && status.positionMillis >= (status.durationMillis ?? 0)) {
-        // Android workaround: force pause when position reached duration
-        setisPreviewPlaying(false)
-        sound.current?.pauseAsync()
-      }
-
-      updatePosition(status.positionMillis)
-    }
-  }
-
-  const handleRecordingStatus = (status: Audio.RecordingStatus) => {
-    if (status.isRecording && status.durationMillis > 0) {
-      setDuration(status.durationMillis)
-
-      if (status.durationMillis > maxDuration) {
-        return
-      }
-
-      updatePosition(status.durationMillis)
-      setMeterings((prev) => {
-        return [
-          ...prev,
-          {
-            position: status.durationMillis,
-            key: status.durationMillis + prev.length,
-            db: status.metering ?? METERING_MIN_POWER,
-          },
-        ]
-      })
-    }
-  }
-
   const record = async () => {
     if (isRecording) return
-    if (recording.current) return
 
     setMeterings([])
     updatePosition(0)
-    setIsRecording(true)
 
-    const newRecording = new Audio.Recording()
-    recording.current = newRecording
-
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: true,
     })
 
-    newRecording.setProgressUpdateInterval(progressInterval)
-    newRecording.setOnRecordingStatusUpdate(handleRecordingStatus)
+    // Prepare and start recording
+    await audioRecorder.prepareToRecordAsync()
 
-    await newRecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
-    const status = await newRecording.startAsync()
+    audioRecorder.record()
 
-    const event: RecordInfo = { uri: status.uri }
+    const event: RecordInfo = { uri: audioRecorder.uri ?? undefined }
     onRecordStart?.(event)
 
     return event
   }
 
   const reset = async () => {
-    setisPreviewPlaying(false)
-    setIsRecording(false)
+    // Stop playback if playing
+    if (isPreviewPlaying) {
+      audioPlayer.pause()
+    }
+
+    // Stop recording if recording
+    if (isRecording) {
+      await audioRecorder.stop()
+    }
 
     setMeterings([])
     updatePosition(0)
     setDuration(0)
 
+    // scrollX.value = withSpring(0, SPRING_CONFIG)
+
     recordingUri.current = undefined
 
-    await recording.current?.stopAndUnloadAsync()
-    recording.current = undefined
+    // Remove audio player source
+    audioPlayer.remove()
 
-    await sound.current?.stopAsync()
-    await sound.current?.unloadAsync()
-    sound.current = undefined
-
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
     onRecordReset?.()
   }
 
@@ -187,52 +170,58 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   }
 
   const playbackAtPosition = async (ms: number) => {
-    if (!sound.current) return
+    if (!recordingUri.current) return
 
-    await sound.current.setPositionAsync(ms)
-    const playStatus = await sound.current.playAsync()
+    // Load the audio if not already loaded
+    if (!audioPlayer.isLoaded) {
+      audioPlayer.replace({ uri: recordingUri.current })
+    }
+
+    // Seek to position (in seconds)
+    audioPlayer.seekTo(ms / 1000)
+    audioPlayer.play()
 
     let status: PlaybackStatus | undefined
-    if (playStatus.isLoaded) {
-      status = { position: playStatus.positionMillis, duration: playStatus.durationMillis }
+    if (playerStatus?.duration) {
+      status = {
+        position: ms,
+        duration: Math.floor(playerStatus.duration * 1000),
+      }
     }
 
     onPlaybackStart?.(status)
-    setisPreviewPlaying(true)
   }
 
   const stop = async () => {
     if (!isRecording) return
-    if (!recording.current) return
 
-    await recording.current?.stopAndUnloadAsync()
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
+    await audioRecorder.stop()
 
-    let durationMillis: number | undefined
-    const uri = recording.current?.getURI()
+    const uri = audioRecorder.uri ?? undefined
+
+    let durationMillis: number | undefined = duration
+
     if (uri) {
-      const newSound = new Audio.Sound()
-      newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus)
+      // Load the recorded audio into the player
+      audioPlayer.replace({ uri })
 
-      await newSound.loadAsync({ uri })
-      await newSound.setProgressUpdateIntervalAsync(progressInterval)
+      recordingUri.current = uri
 
-      // Sync position and duration ms
-      const currentStatus = await newSound.getStatusAsync()
-      if (currentStatus.isLoaded) {
-        durationMillis = currentStatus.durationMillis ?? duration
-        await newSound.setPositionAsync(durationMillis)
+      // Wait a bit for the player to load and get duration
+      // In expo-audio, duration becomes available after loading
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
-        updatePosition(durationMillis)
+      if (audioPlayer.duration) {
+        durationMillis = Math.floor(audioPlayer.duration * 1000)
         setDuration(durationMillis)
       }
 
-      sound.current = newSound
-      recordingUri.current = uri
+      // Set position to end of recording
+      if (durationMillis) {
+        await audioPlayer.seekTo(durationMillis / 1000)
+        updatePosition(durationMillis)
+      }
     }
-
-    recording.current = undefined
-    setIsRecording(false)
 
     const event: RecordInfo = {
       uri,
@@ -244,12 +233,28 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     return event
   }
 
+  // initialize recorder behavior
+  // useEffect(() => {
+  //   ;(async () => {
+  //     const status = await getRecordingPermissionsAsync()
+  //     grantedStatus.current = status.granted
+  //     if (status.granted) {
+  //       setAudioModeAsync({
+  //         playsInSilentMode: true,
+  //         allowsRecording: true,
+  //       })
+  //     }
+  //   })()
+  // }, [])
+
+  // handles wave form updates during recording
   useEffect(() => {
     if (isRecording) {
       scrollX.value = withTiming(-waveformMaxWidth, { duration: progressInterval })
     }
   }, [isRecording, waveformMaxWidth])
 
+  // handles wave form updates during playback
   useEffect(() => {
     if (isPreviewPlaying) {
       const x = (position / TIMELINE_MS_PER_LINE) * timelineTotalWidthPer250ms
@@ -259,17 +264,62 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
     }
   }, [isPreviewPlaying, position])
 
+  // stops recording if it exceeds the max duration
   useEffect(() => {
     if (isRecording && duration >= maxDuration) {
       stop()
     }
   }, [duration, isRecording, maxDuration])
 
+  // Handle PLAYBACK status updates from the AUDIO PLAYER
   useEffect(() => {
-    if (isRecording) {
-      scrollX.value = withSpring(0, SPRING_CONFIG)
+    if (playerStatus.playing && !playerStatus.didJustFinish) {
+      // Update position during playback
+      const positionMs = Math.floor(playerStatus.currentTime * 1000)
+      updatePosition(positionMs)
+    } else if (!playerStatus.playing && playerStatus.didJustFinish) {
+      // Handle playback completion
+      const playbackCurrentMs = playerStatus.currentTime * 1000
+      const playbackDurationMs = playerStatus.duration * 1000
+      audioPlayer.pause()
+      onPlaybackStop?.({
+        position: Math.floor(playbackCurrentMs),
+        duration: Math.floor(playbackDurationMs),
+      })
     }
-  }, [isRecording])
+  }, [
+    playerStatus.playing,
+    playerStatus.currentTime,
+    playerStatus.duration,
+    playerStatus.didJustFinish,
+  ])
+
+  // Handle RECORDING status updates from the AUDIO RECORDER
+  useEffect(() => {
+    if (isRecording && recorderState.durationMillis > 0) {
+      setDuration(recorderState.durationMillis)
+
+      if (recorderState.durationMillis > maxDuration) {
+        return
+      }
+
+      updatePosition(recorderState.durationMillis)
+
+      // Add metering data if available
+      if (recorderState.metering !== undefined) {
+        setMeterings((prev) => {
+          return [
+            ...prev,
+            {
+              position: recorderState.durationMillis,
+              key: recorderState.durationMillis + prev.length,
+              db: recorderState.metering ?? METERING_MIN_POWER,
+            },
+          ]
+        })
+      }
+    }
+  }, [isRecording, recorderState.durationMillis, recorderState.metering])
 
   useImperativeHandle(ref, () => ({
     startRecording: async () => {
@@ -316,18 +366,19 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       }
     },
     stopPlayback: async () => {
-      if (!sound.current) return
       if (!isPreviewPlaying) return
 
-      const pauseStatus = await sound.current.pauseAsync()
+      audioPlayer.pause()
 
       let status: PlaybackStatus | undefined
-      if (pauseStatus.isLoaded) {
-        status = { position: pauseStatus.positionMillis, duration: pauseStatus.durationMillis }
+      if (playerStatus?.currentTime !== undefined && playerStatus?.duration) {
+        status = {
+          position: Math.floor(playerStatus.currentTime * 1000),
+          duration: Math.floor(playerStatus.duration * 1000),
+        }
       }
 
       onPlaybackStop?.(status)
-      setisPreviewPlaying(false)
     },
   }))
 
