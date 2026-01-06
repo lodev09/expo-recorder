@@ -19,28 +19,42 @@ npx expo install @lodev09/expo-recorder
 ### Dependencies
 
 ```sh
-npx expo install expo-av react-native-reanimated react-native-gesture-handler
+npx expo install expo-audio react-native-reanimated react-native-gesture-handler
 ```
 
 You might want to check out the individual installation instructions from this package's dependencies.
 
-* [`expo-av`](https://docs.expo.dev/versions/latest/sdk/av/)
+* [`expo-audio`](https://docs.expo.dev/versions/latest/sdk/audio/)
 * [`react-native-reanimated`](https://docs.swmansion.com/react-native-reanimated/)
 * [`react-native-gesture-handler`](https://docs.swmansion.com/react-native-gesture-handler/docs/)
 
 ## Usage
 
 ```tsx
-import { View, Button } from 'react-native'
+import { View, Button, Alert } from 'react-native'
 import { Recorder, type RecorderRef } from '@lodev09/expo-recorder'
+import { Audio } from "expo-av";
 
 const App = () => {
   const recorder = useRef<RecorderRef>(null)
 
   const startRecording = async () => {
-    const record = await recorder.current?.startRecording()
-    console.log(record.uri)
-  }
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Audio recording permission is required"
+        );
+        return;
+      }
+
+      const record = await recorder.current?.startRecording();
+      console.log(record?.uri);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const stopRecording = async () => {
     const record = await recorder.current?.stopRecording()
