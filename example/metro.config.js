@@ -1,40 +1,37 @@
 const path = require('path')
 const escape = require('escape-string-regexp')
-const { getDefaultConfig } = require('@expo/metro-config')
-const exclusionList = require('metro-config/src/defaults/exclusionList')
+const { getDefaultConfig } = require('expo/metro-config')
 const pak = require('../package.json')
 
-const root = path.resolve(__dirname, '..')
-const modules = Object.keys({ ...pak.peerDependencies })
+const projectRoot = __dirname
+const workspaceRoot = path.resolve(__dirname, '..')
 
-const defaultConfig = getDefaultConfig(__dirname)
+const config = getDefaultConfig(projectRoot)
 
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {
-  ...defaultConfig,
+const peerDeps = Object.keys(pak.peerDependencies ?? {})
 
-  projectRoot: __dirname,
-  watchFolders: [root],
+// block the hoisted copies from <repoRoot>/node_modules/<peerDep>
+const peerDepBlockList = peerDeps.map(
+  (name) => new RegExp(`^${escape(path.join(workspaceRoot, 'node_modules', name))}[\\\\/].*$`)
+)
 
-  // We need to make sure that only one version is loaded for peerDependencies
-  // So we block them at the root, and alias them to the versions in example's node_modules
-  resolver: {
-    ...defaultConfig.resolver,
+// Normalize Metro's default blockList to an array, then prepend ours
+const defaultBlockList = config.resolver.blockList
+  ? Array.isArray(config.resolver.blockList)
+    ? config.resolver.blockList
+    : [config.resolver.blockList]
+  : []
 
-    blacklistRE: exclusionList(
-      modules.map((m) => new RegExp(`^${escape(path.join(root, 'node_modules', m))}\\/.*$`))
-    ),
+config.resolver.blockList = [...peerDepBlockList, ...defaultBlockList]
 
-    extraNodeModules: modules.reduce((acc, name) => {
-      acc[name] = path.join(__dirname, 'node_modules', name)
-      return acc
-    }, {}),
-  },
+// Force peer deps to resolve from the example app's node_modules
+config.resolver.extraNodeModules = {
+  ...(config.resolver.extraNodeModules ?? {}),
+  ...Object.fromEntries(
+    peerDeps.map((name) => [name, path.join(projectRoot, 'node_modules', name)])
+  ),
 }
+
+config.watchFolders = [workspaceRoot]
 
 module.exports = config

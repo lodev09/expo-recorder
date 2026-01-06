@@ -131,9 +131,9 @@ export const ThemedRecorderSheet = forwardRef(
     return (
       <TrueSheet
         ref={ref}
-        sizes={['auto']}
-        style={[{ backgroundColor }, style]}
-        contentContainerStyle={[$sheetContent, { paddingBottom: insets.bottom + Spacing.md }]}
+        detents={['auto']}
+        insetAdjustment="never"
+        style={[{ backgroundColor, paddingVertical: insets.bottom + Spacing.md }, style]}
         {...rest}
       >
         <Recorder
@@ -185,10 +185,6 @@ export const ThemedRecorderSheet = forwardRef(
     )
   }
 )
-
-const $sheetContent: ViewStyle = {
-  paddingTop: Spacing.xl,
-}
 
 const $recordButtonBackground: ViewStyle = {
   borderRadius: RECORD_BUTTON_BACKGROUND_SIZE / 2,
