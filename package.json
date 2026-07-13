@@ -112,6 +112,9 @@
   "workspaces": [
     "example"
   ],
+  "engines": {
+    "node": ">=20.19.4"
+  },
   "packageManager": "yarn@3.6.1",
   "jest": {
     "preset": "react-native",
