@@ -63,14 +63,14 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   })
   const playerStatus = useAudioPlayerStatus(audioPlayer)
 
-  const recordingUri = useRef<string>()
+  const recordingUri = useRef<string | undefined>(undefined)
 
   const [meterings, setMeterings] = useState<Metering[]>([])
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
 
   // Derived from audio hooks
-  const isRecording = recorderState.isRecording && recorderState.isRecording
+  const isRecording = recorderState.isRecording
   const isPreviewPlaying = playerStatus.playing
 
   const timelineTotalWidthPer250ms = timelineGap + WAVEFORM_LINE_WIDTH
@@ -133,12 +133,6 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
   }
 
   const reset = async () => {
-    // Stop playback if playing
-    if (isPreviewPlaying) {
-      audioPlayer.pause()
-    }
-
-    // Stop recording if recording
     if (isRecording) {
       await audioRecorder.stop()
     }
@@ -149,8 +143,13 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
 
     recordingUri.current = undefined
 
-    // Remove audio player source
-    audioPlayer.remove()
+    // Rewind instead of unloading — `remove()` destroys the hook-managed
+    // native player and `replace(null)` throws on iOS. The next record/stop
+    // cycle replaces the source anyway.
+    if (audioPlayer.isLoaded) {
+      audioPlayer.pause()
+      await audioPlayer.seekTo(0)
+    }
 
     onRecordReset?.()
   }
@@ -212,7 +211,8 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       await new Promise((resolve) => setTimeout(resolve, 100))
 
       if (audioPlayer.duration) {
-        durationMillis = Math.floor(audioPlayer.duration * 1000)
+        // android reports the file slightly shorter than recorded — keep the larger
+        durationMillis = Math.max(Math.floor(audioPlayer.duration * 1000), duration)
         setDuration(durationMillis)
       }
 
@@ -294,6 +294,11 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       // Add metering data if available
       if (recorderState.metering !== undefined) {
         setMeterings((prev) => {
+          // skip duplicate emissions for the same position (android)
+          if (prev[prev.length - 1]?.position === recorderState.durationMillis) {
+            return prev
+          }
+
           return [
             ...prev,
             {

@@ -1,7 +1,8 @@
-import { Platform } from 'react-native'
 import type { WithSpringConfig } from 'react-native-reanimated'
 
-export const METERING_MIN_POWER = Platform.select({ default: -50, android: -100 })
+// expo-audio meters android by peak amplitude, so ambient noise reads ~-45..-30 dB.
+// -50 keeps quiet rooms near the baseline on both platforms.
+export const METERING_MIN_POWER = -50
 export const METERING_MAX_POWER = 0
 
 export const WAVEFORM_LINE_WIDTH = 1

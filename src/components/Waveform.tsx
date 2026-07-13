@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 import {
   useWindowDimensions,
   type StyleProp,
@@ -11,11 +11,13 @@ import Animated, {
   useSharedValue,
   type SharedValue,
   useAnimatedStyle,
+  useAnimatedReaction,
   withDecay,
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated'
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
+import { scheduleOnRN } from 'react-native-worklets'
 
 import type { Metering } from '../Recorder.types'
 
@@ -85,6 +87,34 @@ export const Waveform = memo((props: WaveformProps) => {
 
   const prevScrollX = useSharedValue(0)
 
+  // current screen-width "page" of the waveform, tracked from scrollX
+  const [page, setPage] = useState(0)
+
+  useAnimatedReaction(
+    () => Math.round(-scrollX.value / dimensions.width),
+    (current, previous) => {
+      if (current !== previous) {
+        scheduleOnRN(setPage, current)
+      }
+    },
+    [dimensions.width]
+  )
+
+  // only mount bars within ~2 screens of the scroll position
+  const visibleMeterings = useMemo(() => {
+    // parent already trims the list while recording
+    if (recording) return meterings
+
+    const widthPerMs = (timelineGap + WAVEFORM_LINE_WIDTH) / TIMELINE_MS_PER_LINE
+    const minLeft = (page - 2) * dimensions.width
+    const maxLeft = (page + 2) * dimensions.width
+
+    return meterings.filter((metering) => {
+      const left = metering.position * widthPerMs
+      return left >= minLeft && left <= maxLeft
+    })
+  }, [meterings, recording, page, timelineGap, dimensions.width])
+
   const $waveformWrapper: StyleProp<ViewStyle> = [
     {
       height: waveformContainerHeight,
@@ -138,7 +168,7 @@ export const Waveform = memo((props: WaveformProps) => {
           />
           <Animated.View style={$waveformWrapper}>
             <View style={$waveformLineStyles}>
-              {meterings.map(({ position, key, db }) => (
+              {visibleMeterings.map(({ position, key, db }) => (
                 <WaveformLine
                   key={key}
                   gap={timelineGap}
@@ -149,7 +179,13 @@ export const Waveform = memo((props: WaveformProps) => {
                 />
               ))}
             </View>
-            <Timeline duration={maxDuration} gap={timelineGap} color={timelineColor} />
+            <Timeline
+              duration={maxDuration}
+              gap={timelineGap}
+              color={timelineColor}
+              page={page}
+              pageWidth={dimensions.width}
+            />
           </Animated.View>
           {recording && (
             <View
