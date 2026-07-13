@@ -179,7 +179,13 @@ export const Waveform = memo((props: WaveformProps) => {
                 />
               ))}
             </View>
-            <Timeline duration={maxDuration} gap={timelineGap} color={timelineColor} />
+            <Timeline
+              duration={maxDuration}
+              gap={timelineGap}
+              color={timelineColor}
+              page={page}
+              pageWidth={dimensions.width}
+            />
           </Animated.View>
           {recording && (
             <View

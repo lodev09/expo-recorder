@@ -211,7 +211,8 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       await new Promise((resolve) => setTimeout(resolve, 100))
 
       if (audioPlayer.duration) {
-        durationMillis = Math.floor(audioPlayer.duration * 1000)
+        // android reports the file slightly shorter than recorded — keep the larger
+        durationMillis = Math.max(Math.floor(audioPlayer.duration * 1000), duration)
         setDuration(durationMillis)
       }
 
@@ -293,6 +294,11 @@ export const Recorder = forwardRef((props: RecorderProps, ref: Ref<RecorderRef>)
       // Add metering data if available
       if (recorderState.metering !== undefined) {
         setMeterings((prev) => {
+          // skip duplicate emissions for the same position (android)
+          if (prev[prev.length - 1]?.position === recorderState.durationMillis) {
+            return prev
+          }
+
           return [
             ...prev,
             {
